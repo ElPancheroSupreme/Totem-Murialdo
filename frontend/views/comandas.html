@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Comandas - Buffet Murialdino</title>
+  <link rel="stylesheet" href="../assets/style/Config.css">
+  <style>
+    body { background: #e5e7eb; font-family: Arial, sans-serif; margin: 0; padding: 0; height: 100vh; }
+    .comandas-container { height: 100vh; margin: 0; padding: 20px; background: #fff; display: flex; flex-direction: column; box-sizing: border-box; }
+    .comandas-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; flex-shrink: 0; flex-wrap: wrap; }
+    .comandas-header button { padding: 8px 18px; border-radius: 20px; border: none; background: #d1d5db; color: #222; font-weight: bold; cursor: pointer; margin-right: 8px; }
+    .comandas-header button.active { background: #60a5fa; color: #fff; }
+    .bulk-actions { display: flex; gap: 8px; }
+    .btn-green { background: #22c55e; color: #fff; border: none; border-radius: 20px; padding: 8px 18px; font-weight: bold; cursor: pointer; }
+    .btn-red { background: #ef4444; color: #fff; border: none; border-radius: 20px; padding: 8px 18px; font-weight: bold; cursor: pointer; }
+    .btn-green:hover { background: #16a34a; }
+    .btn-red:hover { background: #dc2626; }
+    .comandas-columns { display: flex; gap: 18px; flex: 1; min-height: 0; overflow: hidden; }
+    .comandas-col { flex: 1; background: #f3f4f6; border-radius: 10px; padding: 12px; min-width: 320px; height: 100%; display: flex; flex-direction: column; }
+    .comandas-col-content { flex: 1; overflow-y: auto; padding-right: 8px; }
+    .comandas-col-content::-webkit-scrollbar { width: 6px; }
+    .comandas-col-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    .comandas-col-content::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+    .comandas-col-content::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    .comandas-col h2 { text-align: center; margin: 0 0 8px 0; font-size: 1.2em; flex-shrink: 0; }
+    .comandas-col.listos { border: 3px solid #22c55e; }
+    .comandas-col.preparacion { border: 3px solid #fbbf24; }
+    .comandas-col.pendiente { border: 3px solid #ef4444; }
+    .comandas-col.completados { border: 3px solid #22c55e; }
+    .comandas-col.cancelados { border: 3px solid #ef4444; }
+    .comandas-col .col-title { flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.1em; font-weight: bold; margin-bottom: 4px; }
+    .col-total-row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95em; margin-bottom: 12px; flex-shrink: 0; padding: 8px 0; }
+    .comanda-card { position: relative; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-bottom: 12px; padding: 12px 10px; }
+    .comanda-card .num { font-weight: bold; font-size: 1.1em; margin-left: 30px; }
+    .comanda-card .items { margin: 8px 0; font-size: 1em; }
+    .comanda-card .precio { font-weight: bold; margin-bottom: 8px; }
+    .comanda-card .acciones { display: flex; gap: 8px; }
+    .comanda-checkbox { position: absolute; top: 8px; left: 8px; z-index: 10; width: 18px; height: 18px; cursor: pointer; }
+    .select-all-checkbox { width: 18px; height: 18px; cursor: pointer; margin: 0; vertical-align: middle; }
+    .btn-continuar { background: #22c55e; color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 1em; cursor: pointer; }
+    .btn-cancelar { background: #ef4444; color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 1em; cursor: pointer; }
+    .btn-ver-detalle-comanda { position: absolute; top: 8px; right: 8px; background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 16px; transition: all 0.2s ease; z-index: 10; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+    .btn-ver-detalle-comanda:hover { background: #3b82f6; border-color: #3b82f6; transform: scale(1.1); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); }
+    @media (max-width: 900px) { .comandas-columns { flex-direction: column; } .comandas-col { min-height: 200px; } }
+    #panel-activos, #panel-finalizados { flex: 1; display: flex; flex-direction: column; }
+    
+    /* Modal de detalle */
+    .pedido-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .pedido-overlay[style*="display: block"] { display: flex !important; }
+    .pedido-overlay-content { background-color: white; border-radius: 12px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); width: 100%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+    .pedido-overlay-header { background: #f8f9fa; padding: 20px 24px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; }
+    .pedido-overlay-header h3 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+    .pedido-overlay-close { background: none; border: none; font-size: 28px; cursor: pointer; padding: 8px; border-radius: 6px; transition: all 0.2s ease; }
+    .pedido-overlay-close:hover { background-color: #f3f4f6; color: #ef4444; }
+    .pedido-overlay-body { flex: 1; overflow-y: auto; padding: 24px; }
+    .pedido-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 24px; }
+    .pedido-info p { margin: 8px 0; display: flex; justify-content: space-between; }
+    .items-table { width: 100%; border-collapse: collapse; margin-top: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+    .items-table thead th { background: #f3f4f6; padding: 14px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
+    .items-table tbody td { padding: 14px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    .items-table tbody tr:hover { background-color: #f9fafb; }
+  </style>
+</head>
+<body>
+  <div class="comandas-container">
+    <div class="comandas-header">
+      <div style="display: flex; gap: 8px;">
+        <button class="active" id="btn-activos">Activos</button>
+        <button id="btn-finalizados">Finalizados</button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="theme-switch-container" style="display: flex; align-items: center">
+          <span class="theme-label">☀️</span>
+          <label class="theme-switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="theme-slider"></span>
+          </label>
+          <span class="theme-label">🌙</span>
+        </div>
+        <div class="bulk-actions">
+          <button class="btn-green" id="btn-continuar-masivo" title="Avanzar comandas seleccionadas">▶️ Continuar</button>
+          <button class="btn-red" id="btn-cancelar-masivo" title="Cancelar comandas seleccionadas">❌ Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div id="panel-activos">
+      <div class="comandas-columns">
+        <div class="comandas-col listos">
+          <div class="col-title" style="color:#22c55e;">LISTOS</div>
+          <div class="col-total-row">
+            <input type="checkbox" class="select-all-checkbox" data-columna="listos" title="Seleccionar todos">
+            <span id="listos-total">Total: 0 Pedidos</span>
+          </div>
+          <div class="comandas-col-content">
+            <div id="listos-col"></div>
+          </div>
+        </div>
+        <div class="comandas-col preparacion">
+          <div class="col-title" style="color:#fbbf24;">EN PREPARACIÓN</div>
+          <div class="col-total-row">
+            <input type="checkbox" class="select-all-checkbox" data-columna="preparacion" title="Seleccionar todos">
+            <span id="preparacion-total">Total: 0 Pedidos</span>
+          </div>
+          <div class="comandas-col-content">
+            <div id="preparacion-col"></div>
+          </div>
+        </div>
+        <div class="comandas-col pendiente">
+          <div class="col-title" style="color:#ef4444;">PAGO PENDIENTE</div>
+          <div class="col-total-row">
+            <input type="checkbox" class="select-all-checkbox" data-columna="pendiente" title="Seleccionar todos">
+            <span id="pendiente-total">Total: 0 Pedidos</span>
+          </div>
+          <div class="comandas-col-content">
+            <div id="pendiente-col"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="panel-finalizados" style="display:none;">
+      <div class="comandas-columns">
+        <div class="comandas-col completados">
+          <div class="col-title" style="color:#22c55e;">✔️ COMPLETADOS</div>
+          <div id="completados-total" style="text-align:center;font-size:0.95em;margin-bottom:12px;flex-shrink:0;">Total: 0 Pedidos</div>
+          <div class="comandas-col-content">
+            <div id="completados-col"></div>
+          </div>
+        </div>
+        <div class="comandas-col cancelados">
+          <div class="col-title" style="color:#ef4444;">❌ CANCELADOS</div>
+          <div id="cancelados-total" style="text-align:center;font-size:0.95em;margin-bottom:12px;flex-shrink:0;">Total: 0 Pedidos</div>
+          <div class="comandas-col-content">
+            <div id="cancelados-col"></div>
+          </div>
+        </div>
+      </div>
+  </div>
+  
+  <!-- Modal de detalle de pedido -->
+  <div id="pedido-overlay" class="pedido-overlay" style="display: none;">
+    <div class="pedido-overlay-content">
+      <div class="pedido-overlay-header">
+        <h3>Detalle del Pedido</h3>
+        <button class="pedido-overlay-close" onclick="cerrarDetallePedido()">×</button>
+      </div>
+      <div id="pedido-overlay-body" class="pedido-overlay-body"></div>
+    </div>
+  </div>
+
+  <script>
+    // === VARIABLES GLOBALES ===
+    let comandasSeleccionadas = new Set();
+    
+    // === NAVEGACIÓN ENTRE PANELES ===
+    const btnActivos = document.getElementById('btn-activos');
+    const btnFinalizados = document.getElementById('btn-finalizados');
+    const panelActivos = document.getElementById('panel-activos');
+    const panelFinalizados = document.getElementById('panel-finalizados');
+    
+    btnActivos.onclick = function() {
+      btnActivos.classList.add('active');
+      btnFinalizados.classList.remove('active');
+      panelActivos.style.display = '';
+      panelFinalizados.style.display = 'none';
+    };
+    
+    btnFinalizados.onclick = function() {
+      btnFinalizados.classList.add('active');
+      btnActivos.classList.remove('active');
+      panelActivos.style.display = 'none';
+      panelFinalizados.style.display = '';
+    };
+
+    // === FUNCIÓN PRINCIPAL DE CARGA DE PEDIDOS ===
+    async function cargarPedidos() {
+      const listosCol = document.getElementById('listos-col');
+      const preparacionCol = document.getElementById('preparacion-col');
+      const pendienteCol = document.getElementById('pendiente-col');
+      const completadosCol = document.getElementById('completados-col');
+      const canceladosCol = document.getElementById('cancelados-col');
+
+      const listosTotal = document.getElementById('listos-total');
+      const preparacionTotal = document.getElementById('preparacion-total');
+      const pendienteTotal = document.getElementById('pendiente-total');
+      const completadosTotal = document.getElementById('completados-total');
+      const canceladosTotal = document.getElementById('cancelados-total');
+
+      if (!listosCol || !preparacionCol || !pendienteCol) return;
+
+      // Guardar scroll
+      const scrollPositions = {};
+      const columnas = [
+        { element: listosCol, key: 'listos' },
+        { element: preparacionCol, key: 'preparacion' },
+        { element: pendienteCol, key: 'pendiente' },
+        { element: completadosCol, key: 'completados' },
+        { element: canceladosCol, key: 'cancelados' }
+      ];
+
+      columnas.forEach(({ element, key }) => {
+        if (element) {
+          const scrollContainer = element.parentElement;
+          if (scrollContainer) {
+            scrollPositions[key] = scrollContainer.scrollTop;
+          }
+        }
+      });
+
+      // Limpia columnas
+      [listosCol, preparacionCol, pendienteCol, completadosCol, canceladosCol].forEach(col => {
+        if (col) col.innerHTML = '<div style="text-align:center;color:#888;padding:1.5rem;">Cargando...</div>';
+      });
+
+      try {
+        const res = await fetch('/Totem_Murialdo/backend/admin/api/api_pedidos.php');
+        const data = await res.json();
+
+        [listosCol, preparacionCol, pendienteCol, completadosCol, canceladosCol].forEach(col => {
+          if (col) col.innerHTML = '';
+        });
+
+        let cListos = 0, cPreparacion = 0, cPendiente = 0, cCompletados = 0, cCancelados = 0;
+
+        if (data.success && Array.isArray(data.pedidos)) {
+          const pedidosOrdenados = data.pedidos.sort((a, b) => {
+            const fechaA = new Date(a.creado_en);
+            const fechaB = new Date(b.creado_en);
+            return fechaA - fechaB;
+          });
+          
+          pedidosOrdenados.forEach(pedido => {
+            let estado = (pedido.estado || '').toLowerCase();
+            let destino = null, totalEl = null, acciones = '';
+            let esComandaFinalizada = false;
+            
+            if (estado === 'preparado' || estado === 'listo') {
+              destino = listosCol; totalEl = listosTotal; cListos++;
+              acciones = `<button class='btn-continuar'>Finalizar</button> <button class='btn-cancelar'>Cancelar</button>`;
+            } else if (estado === 'preparacion') {
+              destino = preparacionCol; totalEl = preparacionTotal; cPreparacion++;
+              acciones = `<button class='btn-continuar'>Continuar</button> <button class='btn-cancelar'>Cancelar</button>`;
+            } else if (estado === 'pendiente' || estado === 'esperando' || estado === 'pago pendiente') {
+              destino = pendienteCol; totalEl = pendienteTotal; cPendiente++;
+              acciones = `<button class='btn-continuar'>Continuar</button> <button class='btn-cancelar'>Cancelar</button>`;
+            } else if (estado === 'entregado' || estado === 'completado' || estado === 'pago') {
+              destino = completadosCol; totalEl = completadosTotal; cCompletados++;
+              acciones = '';
+              esComandaFinalizada = true;
+            } else if (estado === 'cancelado') {
+              destino = canceladosCol; totalEl = canceladosTotal; cCancelados++;
+              acciones = '';
+              esComandaFinalizada = true;
+            }
+            
+            if (!destino) return;
+
+            let pedidoHTML = `
+              <div class="comanda-card" data-id-pedido="${pedido.id_pedido}">
+                ${!esComandaFinalizada ? `<input type="checkbox" class="comanda-checkbox" data-id-pedido="${pedido.id_pedido}">` : ''}
+                <button class="btn-ver-detalle-comanda" data-id-pedido="${pedido.id_pedido}" title="Ver detalle">👁️</button>
+                <div class="num" data-estado="${pedido.estado}">Nº ${pedido.numero_pedido}</div>
+                <div class="items" id="items-detalle-${pedido.id_pedido}">${pedido.cantidad_items} items</div>
+                <div class="precio">PRECIO: $${parseFloat(pedido.monto_total).toLocaleString()}</div>
+                <div class="acciones">${acciones}</div>
+              </div>
+            `;
+            destino.innerHTML += pedidoHTML;
+            
+            // Cargar detalles para la columna de preparación
+            if (destino === preparacionCol) {
+              const currentScrollPos = scrollPositions['preparacion'] || 0;
+              
+              fetch(`/Totem_Murialdo/backend/admin/api/api_pedidos.php?detalle=${pedido.id_pedido}`)
+                .then(r => r.json())
+                .then(det => {
+                  if (det.success && Array.isArray(det.items) && det.items.length > 0) {
+                    const itemsAgrupados = {};
+                    
+                    det.items.forEach(item => {
+                      const personalizacionesOrdenadas = item.personalizaciones ? 
+                        [...item.personalizaciones].sort().join('|') : '';
+                      const clave = `${item.nombre}||${personalizacionesOrdenadas}`;
+                      
+                      if (itemsAgrupados[clave]) {
+                        itemsAgrupados[clave].cantidad += parseInt(item.cantidad);
+                      } else {
+                        itemsAgrupados[clave] = {
+                          nombre: item.nombre,
+                          cantidad: parseInt(item.cantidad),
+                          personalizaciones: item.personalizaciones || [],
+                          notas: item.notas
+                        };
+                      }
+                    });
+                    
+                    const itemsList = Object.values(itemsAgrupados).map(item => {
+                      let itemHTML = `<li>${item.cantidad}x ${item.nombre}`;
+                      if (item.notas) {
+                        itemHTML += ` <span style='color:#888;font-size:0.95em'>(${item.notas})</span>`;
+                      }
+                      if (item.personalizaciones && item.personalizaciones.length > 0) {
+                        const personalizacionesHTML = item.personalizaciones.map(pers => 
+                          `<div style='margin-left:20px;color:#666;font-size:0.9em;'>-${pers}</div>`
+                        ).join('');
+                        itemHTML += personalizacionesHTML;
+                      }
+                      itemHTML += `</li>`;
+                      return itemHTML;
+                    }).join('');
+                    
+                    const itemsEl = document.getElementById(`items-detalle-${pedido.id_pedido}`);
+                    if (itemsEl) {
+                      itemsEl.innerHTML = `<ul style='margin:6px 0 0 0;padding-left:18px;'>${itemsList}</ul>`;
+                      
+                      if (currentScrollPos > 0) {
+                        setTimeout(() => {
+                          const scrollContainer = preparacionCol.parentElement;
+                          if (scrollContainer) {
+                            scrollContainer.scrollTop = currentScrollPos;
+                          }
+                        }, 75);
+                      }
+                    }
+                  }
+                })
+                .catch(() => {});
+            }
+          });
+        }
+        
+        // Actualiza totales
+        listosTotal.textContent = `Total: ${cListos} Pedido${cListos!==1?'s':''}`;
+        preparacionTotal.textContent = `Total: ${cPreparacion} Pedido${cPreparacion!==1?'s':''}`;
+        pendienteTotal.textContent = `Total: ${cPendiente} Pedido${cPendiente!==1?'s':''}`;
+        completadosTotal.textContent = `Total: ${cCompletados} Pedido${cCompletados!==1?'s':''}`;
+        canceladosTotal.textContent = `Total: ${cCancelados} Pedido${cCancelados!==1?'s':''}`;
+
+        // Restaurar scroll
+        setTimeout(() => {
+          columnas.forEach(({ element, key }) => {
+            if (element && scrollPositions[key] !== undefined && scrollPositions[key] > 0) {
+              const scrollContainer = element.parentElement;
+              if (scrollContainer) {
+                scrollContainer.scrollTop = scrollPositions[key];
+              }
+            }
+          });
+        }, 150);
+        
+        // Restaurar selecciones
+        restaurarSelecciones();
+
+      } catch (e) {
+        [listosCol, preparacionCol, pendienteCol, completadosCol, canceladosCol].forEach(col => {
+          if (col) col.innerHTML = '<div style="text-align:center;color:#888;padding:1.5rem;">Error de conexión</div>';
+        });
+        console.error('Error de conexión:', e);
+      }
+    }
+
+    // === FUNCIÓN PARA MOSTRAR DETALLE DE COMANDA ===
+    async function mostrarDetalleComanda(idPedido) {
+      const overlay = document.getElementById('pedido-overlay');
+      const overlayBody = document.getElementById('pedido-overlay-body');
+
+      try {
+        overlay.style.display = 'block';
+        overlayBody.innerHTML = '<div style="text-align:center;padding:2rem;">Cargando...</div>';
+
+        // Obtener datos básicos del pedido desde la card
+        const card = document.querySelector(`.comanda-card[data-id-pedido="${idPedido}"]`);
+        if (!card) {
+          overlayBody.innerHTML = '<div style="text-align:center;padding:2rem;color:#ef4444;">No se encontró el pedido</div>';
+          return;
+        }
+
+        const numeroPedido = card.querySelector('.num')?.textContent || 'N/A';
+        const estado = card.querySelector('.num')?.getAttribute('data-estado') || 'N/A';
+        const montoTotal = card.querySelector('.precio')?.textContent.replace('PRECIO: ', '') || '$0';
+
+        // Obtener items detallados del backend
+        const response = await fetch(`/Totem_Murialdo/backend/admin/api/api_pedidos.php?detalle=${idPedido}`);
+        const data = await response.json();
+
+        if (!data.success || !data.items) {
+          overlayBody.innerHTML = '<div style="text-align:center;padding:2rem;color:#ef4444;">Error al cargar los items del pedido</div>';
+          return;
+        }
+
+        const items = data.items || [];
+
+        // Agrupar items por producto y personalizaciones
+        const itemsAgrupados = {};
+        items.forEach(item => {
+          const personalizacionesOrdenadas = item.personalizaciones ? [...item.personalizaciones].sort().join('|') : '';
+          const clave = `${item.nombre}||${personalizacionesOrdenadas}`;
+          
+          if (itemsAgrupados[clave]) {
+            itemsAgrupados[clave].cantidad += parseInt(item.cantidad);
+            itemsAgrupados[clave].precio_total += parseFloat(item.precio_unitario) * parseInt(item.cantidad);
+          } else {
+            itemsAgrupados[clave] = {
+              nombre: item.nombre,
+              cantidad: parseInt(item.cantidad),
+              personalizaciones: item.personalizaciones || [],
+              precio_total: parseFloat(item.precio_unitario) * parseInt(item.cantidad)
+            };
+          }
+        });
+
+        const itemsHTML = Object.values(itemsAgrupados).map(item => {
+          let personalizacionesHTML = '';
+          if (item.personalizaciones && item.personalizaciones.length > 0) {
+            personalizacionesHTML = '<div style="font-size:0.9em;color:#666;margin-top:4px;">' +
+              item.personalizaciones.map(p => `• ${p}`).join('<br>') +
+              '</div>';
+          }
+          
+          return `
+            <tr>
+              <td>${item.nombre}${personalizacionesHTML}</td>
+              <td style="text-align:center;">${item.cantidad}</td>
+              <td style="text-align:right;">$${item.precio_total.toLocaleString()}</td>
+            </tr>
+          `;
+        }).join('');
+
+        overlayBody.innerHTML = `
+          <div class="pedido-detalle">
+            <div class="pedido-info">
+              <p><strong>Pedido:</strong> <span>${numeroPedido}</span></p>
+              <p><strong>Estado:</strong> <span>${estado}</span></p>
+            </div>
+            <div class="pedido-items">
+              <h4>Detalles del Pedido</h4>
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th style="text-align:center;">Cantidad</th>
+                    <th style="text-align:right;">Precio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHTML}
+                  <tr style="border-top:2px solid #e5e7eb;font-weight:bold;">
+                    <td colspan="2" style="text-align:right;">TOTAL:</td>
+                    <td style="text-align:right;">${montoTotal}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error al mostrar detalle:', error);
+        overlayBody.innerHTML = '<div style="text-align:center;padding:2rem;color:#ef4444;">Error al cargar los detalles</div>';
+      }
+    }
+
+    function cerrarDetallePedido() {
+      document.getElementById('pedido-overlay').style.display = 'none';
+    }
+
+    // === EVENTOS DELEGADOS ===
+    document.addEventListener('click', async function(e) {
+      // Ver detalle
+      if (e.target.classList.contains('btn-ver-detalle-comanda')) {
+        const idPedido = e.target.getAttribute('data-id-pedido');
+        if (idPedido) {
+          mostrarDetalleComanda(idPedido);
+        }
+        return;
+      }
+      
+      // Cancelar pedido
+      if (e.target.classList.contains('btn-cancelar')) {
+        const card = e.target.closest('.comanda-card');
+        if (!card) return;
+        const id_pedido = card.getAttribute('data-id-pedido');
+        if (!id_pedido) return alert('No se pudo identificar el pedido');
+        if (!confirm('¿Seguro que deseas cancelar este pedido?')) return;
+        
+        e.target.disabled = true;
+        e.target.textContent = 'Cancelando...';
+        
+        try {
+          const res = await fetch('/Totem_Murialdo/backend/admin/api/cancelar_pedido.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_pedido })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            cargarPedidos();
+          } else {
+            alert(data.error || 'Error al cancelar');
+            e.target.disabled = false;
+            e.target.textContent = 'Cancelar';
+          }
+        } catch (err) {
+          alert('Error de conexión');
+          e.target.disabled = false;
+          e.target.textContent = 'Cancelar';
+        }
+        return;
+      }
+      
+      // Continuar pedido
+      if (e.target.classList.contains('btn-continuar')) {
+        const card = e.target.closest('.comanda-card');
+        if (!card) return;
+        const id_pedido = card.getAttribute('data-id-pedido');
+        const estado_actual = (card.querySelector('.num')?.getAttribute('data-estado') || '').toLowerCase();
+        if (!id_pedido || !estado_actual) return alert('No se pudo identificar el pedido o su estado');
+        
+        e.target.disabled = true;
+        e.target.textContent = 'Avanzando...';
+        
+        try {
+          const res = await fetch('/Totem_Murialdo/backend/admin/api/avanzar_estado_pedido.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_pedido, estado_actual })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            cargarPedidos();
+          } else {
+            alert(data.error || 'Error al avanzar estado');
+            e.target.disabled = false;
+            e.target.textContent = 'Continuar';
+          }
+        } catch (err) {
+          alert('Error de conexión');
+          e.target.disabled = false;
+          e.target.textContent = 'Continuar';
+        }
+        return;
+      }
+      
+      // Cerrar modal al hacer clic fuera
+      if (e.target.id === 'pedido-overlay') {
+        cerrarDetallePedido();
+      }
+    });
+
+    // === FUNCIONALIDAD DE CHECKBOXES ===
+    document.addEventListener('change', function(e) {
+      // Select all checkbox
+      if (e.target.classList.contains('select-all-checkbox')) {
+        const columna = e.target.getAttribute('data-columna');
+        const columnElement = document.querySelector(`.comandas-col.${columna} .comandas-col-content`);
+        
+        if (columnElement) {
+          const checkboxes = columnElement.querySelectorAll('.comanda-checkbox:not(.select-all-checkbox)');
+          checkboxes.forEach(checkbox => {
+            checkbox.checked = e.target.checked;
+            const idPedido = checkbox.getAttribute('data-id-pedido');
+            if (e.target.checked) {
+              comandasSeleccionadas.add(idPedido);
+            } else {
+              comandasSeleccionadas.delete(idPedido);
+            }
+          });
+        }
+        return;
+      }
+      
+      // Individual checkbox
+      if (e.target.classList.contains('comanda-checkbox') && !e.target.classList.contains('select-all-checkbox')) {
+        const idPedido = e.target.getAttribute('data-id-pedido');
+        if (e.target.checked) {
+          comandasSeleccionadas.add(idPedido);
+        } else {
+          comandasSeleccionadas.delete(idPedido);
+        }
+        actualizarEstadoSelectAll();
+      }
+    });
+
+    function actualizarEstadoSelectAll() {
+      const columnas = ['listos', 'preparacion', 'pendiente'];
+      
+      columnas.forEach(columna => {
+        const columnElement = document.querySelector(`.comandas-col.${columna} .comandas-col-content`);
+        const selectAllCheckbox = document.querySelector(`.select-all-checkbox[data-columna="${columna}"]`);
+        
+        if (columnElement && selectAllCheckbox) {
+          const checkboxes = Array.from(columnElement.querySelectorAll('.comanda-checkbox:not(.select-all-checkbox)'));
+          const checkedCheckboxes = checkboxes.filter(cb => cb.checked);
+          
+          if (checkboxes.length === 0) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+          } else if (checkedCheckboxes.length === 0) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+          } else if (checkedCheckboxes.length === checkboxes.length) {
+            selectAllCheckbox.checked = true;
+            selectAllCheckbox.indeterminate = false;
+          } else {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = true;
+          }
+        }
+      });
+    }
+
+    function restaurarSelecciones() {
+      setTimeout(() => {
+        document.querySelectorAll('.comanda-checkbox:not(.select-all-checkbox)').forEach(checkbox => {
+          const idPedido = checkbox.getAttribute('data-id-pedido');
+          if (comandasSeleccionadas.has(idPedido)) {
+            checkbox.checked = true;
+          }
+        });
+        actualizarEstadoSelectAll();
+      }, 100);
+    }
+
+    // === ACCIONES MASIVAS ===
+    document.getElementById('btn-continuar-masivo').addEventListener('click', async function() {
+      if (comandasSeleccionadas.size === 0) {
+        alert('No hay comandas seleccionadas');
+        return;
+      }
+      
+      if (!confirm(`¿Avanzar ${comandasSeleccionadas.size} comanda(s) seleccionada(s)?`)) return;
+      
+      this.disabled = true;
+      this.textContent = 'Procesando...';
+      
+      const idsArray = Array.from(comandasSeleccionadas);
+      let exitosos = 0;
+      let errores = 0;
+      
+      for (const id_pedido of idsArray) {
+        const card = document.querySelector(`.comanda-card[data-id-pedido="${id_pedido}"]`);
+        const estado_actual = card ? (card.querySelector('.num')?.getAttribute('data-estado') || '').toLowerCase() : '';
+        
+        if (!estado_actual) {
+          errores++;
+          continue;
+        }
+        
+        try {
+          const res = await fetch('/Totem_Murialdo/backend/admin/api/avanzar_estado_pedido.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_pedido, estado_actual })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            exitosos++;
+            comandasSeleccionadas.delete(id_pedido);
+          } else {
+            errores++;
+          }
+        } catch (err) {
+          errores++;
+        }
+      }
+      
+      this.disabled = false;
+      this.textContent = '▶️ Continuar';
+      
+      alert(`Operación completada:\n✓ Exitosos: ${exitosos}\n✗ Errores: ${errores}`);
+      cargarPedidos();
+    });
+
+    document.getElementById('btn-cancelar-masivo').addEventListener('click', async function() {
+      if (comandasSeleccionadas.size === 0) {
+        alert('No hay comandas seleccionadas');
+        return;
+      }
+      
+      if (!confirm(`¿Cancelar ${comandasSeleccionadas.size} comanda(s) seleccionada(s)? Esta acción no se puede deshacer.`)) return;
+      
+      this.disabled = true;
+      this.textContent = 'Procesando...';
+      
+      const idsArray = Array.from(comandasSeleccionadas);
+      let exitosos = 0;
+      let errores = 0;
+      
+      for (const id_pedido of idsArray) {
+        try {
+          const res = await fetch('/Totem_Murialdo/backend/admin/api/cancelar_pedido.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_pedido })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            exitosos++;
+            comandasSeleccionadas.delete(id_pedido);
+          } else {
+            errores++;
+          }
+        } catch (err) {
+          errores++;
+        }
+      }
+      
+      this.disabled = false;
+      this.textContent = '❌ Cancelar';
+      
+      alert(`Operación completada:\n✓ Exitosos: ${exitosos}\n✗ Errores: ${errores}`);
+      cargarPedidos();
+    });
+
+    // === CONFIGURACIÓN DEL THEME TOGGLE ===
+    function initThemeToggle() {
+      const themeToggle = document.getElementById('theme-toggle');
+      if (themeToggle) {
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        themeToggle.checked = savedTheme === 'dark';
+
+        themeToggle.addEventListener('change', function () {
+          const theme = this.checked ? 'dark' : 'light';
+          body.setAttribute('data-theme', theme);
+          localStorage.setItem('theme', theme);
+        });
+      }
+    }
+
+    // Cargar al iniciar y cada 15 segundos
+    cargarPedidos();
+    setInterval(cargarPedidos, 15000);
+    
+    // Inicializar theme toggle
+    initThemeToggle();
+  </script>
+</body>
+</html>

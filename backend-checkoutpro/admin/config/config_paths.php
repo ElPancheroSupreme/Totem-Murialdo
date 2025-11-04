@@ -1,0 +1,23 @@
+<?php
+// Configuración de rutas del proyecto
+
+// Detectar la ruta base del proyecto automáticamente
+function getProjectRoot() {
+    $scriptPath = $_SERVER['SCRIPT_NAME'];
+    $docRoot = $_SERVER['DOCUMENT_ROOT'];
+    
+    // Obtener la ruta del proyecto relativa al document root - BACKEND CHECKOUTPRO
+    $projectPath = dirname(dirname(dirname($scriptPath))); // Subir tres niveles desde backend-checkoutpro/admin/config/
+    
+    return $projectPath;
+}
+
+// Definir la ruta base del proyecto
+define('PROJECT_ROOT', getProjectRoot());
+
+// Función para construir URLs de imágenes - FRONTEND CHECKOUTPRO
+function buildImageUrl($relativePath) {
+    // Las imágenes están en frontend-checkoutpro/assets/images/ para el flujo CheckoutPro
+    return '/Totem_Murialdo/frontend-checkoutpro/assets/images/' . ltrim($relativePath, '/');
+}
+?>

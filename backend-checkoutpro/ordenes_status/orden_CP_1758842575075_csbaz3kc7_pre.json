@@ -1,0 +1,27 @@
+{
+    "carrito": [
+        {
+            "id_producto": 8,
+            "nombre": "Sprite 237ml",
+            "cantidad": 2,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Sprite_237ml.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 2,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758842575075_csbaz3kc7",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-25T23:22:55.076Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-25 20:24:47"
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="../assets/images/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/android-chrome-512x512.png">
+    <title>Seleccion de Local</title>
+    <link rel="stylesheet" href="../assets/style/index.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <main>
+        <div class="Logo">
+            <img src="../assets/images/Iconos/Logo.png" alt="">
+        </div>
+
+        <div class="Bienvenida">
+            <p>¡Bienvenido!</p>
+        </div>
+
+        <div class="Pregunta">
+            <p>¿Donde querés pedir?</p>
+        </div>
+
+        <div class="Contenedor_Botones">
+            <button id="Buffet">
+                <img src="../assets/images/Iconos/Icono_Buffet.png" alt="">
+                <p>Buffet</p>
+            </button>
+            <button id="Kiosco">
+                <img src="../assets/images/Iconos/Icono_Kiosco.png" alt="">
+                <p>Kiosco</p>
+            </button>
+        </div>
+    </main>
+    <!-- Overlay Mantenimiento -->
+    <div id="overlay-mantenimiento"
+        style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(30,30,30,0.95);color:#fff;flex-direction:column;align-items:center;justify-content:center;font-size:2em;">
+        <div style="margin-bottom:24px;">⚠️ Modo Mantenimiento Activo</div>
+        <div>El tótem está temporalmente fuera de servicio.</div>
+    </div>
+
+
+    <script>
+        async function checkMantenimiento() {
+            try {
+                const res = await fetch('/Totem_Murialdo/backend/admin/api/configuracion_horarios.php');
+                const data = await res.json();
+                if (data && data.success && data.config && data.config.modo_mantenimiento) {
+                    document.getElementById('overlay-mantenimiento').style.display = 'flex';
+                    document.getElementById('Buffet').disabled = true;
+                    document.getElementById('Kiosco').disabled = true;
+                } else {
+                    document.getElementById('overlay-mantenimiento').style.display = 'none';
+                    document.getElementById('Buffet').disabled = false;
+                    document.getElementById('Kiosco').disabled = false;
+                }
+            } catch (e) {
+                document.getElementById('overlay-mantenimiento').style.display = 'none';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ocultar overlay antes de la primera consulta
+            document.getElementById('overlay-mantenimiento').style.display = 'none';
+            checkMantenimiento();
+            setInterval(checkMantenimiento, 5000); // Actualiza cada 5 segundos
+            document.getElementById('Buffet').addEventListener('click', function () {
+                if (document.getElementById('overlay-mantenimiento').style.display === 'flex') return;
+                window.location.href = 'buffet.html';
+            });
+            document.getElementById('Kiosco').addEventListener('click', function () {
+                if (document.getElementById('overlay-mantenimiento').style.display === 'flex') return;
+                window.location.href = 'kiosco_dinamico.html';
+            });
+        });
+    </script>
+    <script src="../assets/js/index_horarios.js"></script>
+    <script src="../assets/js/inactivity-detector.js"></script>
+
+    
+
+
+</body>
+
+</html>

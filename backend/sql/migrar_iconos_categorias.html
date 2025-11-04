@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejecutar Migración de Iconos - Categorías</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .warning-box strong {
+            color: #856404;
+        }
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 15px;
+            padding-left: 40px;
+            position: relative;
+        }
+        .steps li:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Migración de Iconos de Categorías</h1>
+            <p>Convertir emojis a rutas de archivos SVG</p>
+        </div>
+        
+        <div class="content">
+            <div class="warning-box">
+                <strong>⚠️ IMPORTANTE:</strong> Esta migración modificará la base de datos. Asegúrate de tener un backup antes de continuar.
+            </div>
+
+            <div class="info-box">
+                <strong>📋 Qué hace este script:</strong>
+                <ul class="steps">
+                    <li>Modifica la columna <code>icono</code> en la tabla <code>categorias</code></li>
+                    <li>Cambia de VARCHAR(10) a VARCHAR(255) para almacenar rutas de archivos</li>
+                    <li>Actualiza los registros existentes con las rutas de los archivos SVG correspondientes</li>
+                    <li>Verifica que los cambios se hayan aplicado correctamente</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" onclick="ejecutarMigracion()">▶️ Ejecutar Migración Ahora</button>
+            </div>
+
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function ejecutarMigracion() {
+            const btn = event.target;
+            const resultDiv = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Ejecutando...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Ejecutando migración, por favor espera...\n\n';
+
+            try {
+                const response = await fetch('ejecutar_migracion_iconos.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ MIGRACIÓN COMPLETADA EXITOSAMENTE\n\n';
+                    resultDiv.textContent += data.message + '\n\n';
+                    
+                    if (data.details) {
+                        resultDiv.textContent += 'DETALLES:\n';
+                        resultDiv.textContent += JSON.stringify(data.details, null, 2);
+                    }
+                    
+                    btn.textContent = '✓ Migración Completada';
+                    btn.style.background = '#28a745';
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ ERROR EN LA MIGRACIÓN\n\n';
+                resultDiv.textContent += error.message;
+                
+                btn.disabled = false;
+                btn.textContent = '🔄 Reintentar';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/Iconos/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/Iconos/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/Iconos/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/Iconos/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/android-chrome-512x512.png">
+    <title>Metodo de Pago</title>
+    <link rel="stylesheet" href="../assets/style/metodopago.css">
+</head>
+
+<body>
+    <main>
+    <div class="Logo">
+        <img src="../assets/images/Iconos/Logo.png" alt="">
+    </div>
+    <div class="Pregunta">
+        <p>¿Cómo vas a pagar?</p>
+    </div>
+    <div class="Contenedor_Botones">
+        <a href="checkoutpro.html" id="btn-billetera-virtual">
+            <div class="Boton">
+                <img src="../assets/images/Iconos/Icono_Billetera.png" alt="">
+                <p>Mercado Pago</p>
+            </div>
+        </a>
+    </div>
+    <div id="fuera-minimo-overlay" style="display:none;"></div>
+    <footer>
+        <div class="Footer_Contenedor_Botones">
+            <button id="Boton_Atras">Atrás</button>
+        </div>
+    </footer>
+    <script>
+        // --- Overlay de mínimo Mercado Pago ---
+        function mostrarOverlayMinimo(msg) {
+            const overlay = document.getElementById('fuera-minimo-overlay');
+            overlay.style.display = 'flex';
+            overlay.style.position = 'fixed';
+            overlay.style.top = 0;
+            overlay.style.left = 0;
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.background = 'rgba(0,0,0,0.85)';
+            overlay.style.zIndex = 9999;
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.innerHTML = `<div style='background:#fff;padding:32px 48px;border-radius:18px;box-shadow:0 4px 32px #0008;text-align:center;max-width:90vw;'>
+      <div style='font-size:2.2rem;margin-bottom:18px;'>💳</div>
+      <div>El monto mínimo para pagar con Mercado Pago es:</div>
+      <div style='font-size:2.2rem;font-weight:bold;margin:10px 0;' id='minimo-mp-overlay-valor'></div>
+      <div style='font-size:1.1rem;margin-top:10px;'>${msg || 'Por favor, agregue más productos para continuar.'}</div>
+      <button id="btn-volver-minimo" style='margin-top:18px;font-size:1.2rem;padding:8px 32px;border-radius:8px;border:none;background:#facd15;color:#222;cursor:pointer;'>Volver</button>
+    </div>`;
+            document.body.style.pointerEvents = 'none';
+            overlay.style.pointerEvents = 'auto';
+            setTimeout(() => {
+                const btnVolver = document.getElementById('btn-volver-minimo');
+                if (btnVolver) {
+                    btnVolver.onclick = function () {
+                        document.body.style.pointerEvents = '';
+                        // Redirección dinámica según punto de venta
+                        const puntoVentaNombre = localStorage.getItem('punto_venta_nombre');
+                        if (puntoVentaNombre && puntoVentaNombre.toLowerCase() === 'buffet') {
+                            window.location.href = 'buffet.html';
+                        } else {
+                            window.location.href = 'kiosco_dinamico.html';
+                        }
+                    };
+                }
+            }, 50);
+        }
+        function ocultarOverlayMinimo() {
+            const overlay = document.getElementById('fuera-minimo-overlay');
+            overlay.style.display = 'none';
+            document.body.style.pointerEvents = '';
+        }
+        // --- Lógica de métodos de pago habilitados ---
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Agregar event listener para el botón del footer
+            const botonAtras = document.getElementById('Boton_Atras');
+            
+            // Botón Atrás - regresa al carrito sin limpiar
+            if (botonAtras) {
+                botonAtras.addEventListener('click', function() {
+                    window.location.href = 'carrito.html';
+                });
+            }
+
+            // En el frontend CheckoutPro, Mercado Pago siempre está disponible
+            const btnVirtual = document.getElementById('btn-billetera-virtual');
+
+            // Lógica de click CheckoutPro
+            if (btnVirtual) {
+                btnVirtual.addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    
+                    console.log('=== INICIO PROCESO CHECKOUTPRO ===');
+                    
+                    // Verificar datos del carrito
+                    const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                    const total = parseFloat(localStorage.getItem('carrito_total') || '0');
+                    
+                    console.log('Carrito:', carrito);
+                    console.log('Total del carrito:', total);
+                    
+                    if (!carrito.length) {
+                        alert('No hay productos en el carrito');
+                        // Redirección dinámica según punto de venta
+                        const puntoVentaNombre = localStorage.getItem('punto_venta_nombre');
+                        if (puntoVentaNombre && puntoVentaNombre.toLowerCase() === 'buffet') {
+                            window.location.href = 'buffet.html';
+                        } else {
+                            window.location.href = 'kiosco_dinamico.html';
+                        }
+                        return;
+                    }
+                    
+                    // Obtener monto mínimo desde backend
+                    let montoMinimo = 1;
+                    try {
+                        console.log('Obteniendo configuración...');
+                        const res = await fetch('../../backend-checkoutpro/admin/api/configuracion_horarios.php');
+                        console.log('Respuesta configuración status:', res.status);
+                        
+                        if (res.ok) {
+                            const data = await res.json();
+                            console.log('Configuración completa:', data);
+                            
+                            if (data && data.success && data.config && typeof data.config.monto_minimo_mp !== 'undefined') {
+                                montoMinimo = parseFloat(data.config.monto_minimo_mp);
+                                console.log('✅ Monto mínimo obtenido:', montoMinimo);
+                            } else {
+                                console.log('⚠️ Configuración no encontrada, usando monto mínimo por defecto');
+                            }
+                        } else {
+                            console.log('❌ Error HTTP en configuración:', res.status);
+                        }
+                    } catch (e) { 
+                        console.log('❌ Error obteniendo configuración:', e);
+                    }
+                    
+                    console.log('📊 Validación - Total:', total, 'Mínimo:', montoMinimo);
+                    
+                    if (total < montoMinimo) {
+                        console.log('❌ Total menor al mínimo, mostrando overlay');
+                        mostrarOverlayMinimo('El total de tu pedido es menor al mínimo permitido para Mercado Pago.');
+                        document.getElementById('minimo-mp-overlay-valor').textContent = `$${montoMinimo.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                        return;
+                    }
+                    
+                    console.log('✅ Validación pasada, procediendo a CheckoutPro');
+                    ocultarOverlayMinimo();
+                    
+                    // Redirigir a CheckoutPro
+                    console.log('🚀 Redirigiendo a CheckoutPro...');
+                    window.location.href = 'checkoutpro.html';
+                });
+            } else {
+                console.error('❌ No se encontró el botón de Mercado Pago');
+            }
+        });
+    </script>
+    <script src="../assets/js/inactivity-detector.js"></script>
+    </main>
+</body>
+
+</html>
+

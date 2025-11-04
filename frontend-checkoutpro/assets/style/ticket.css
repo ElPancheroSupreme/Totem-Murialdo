@@ -1,0 +1,245 @@
+html, body {
+  width: 100dvw;
+  height: 100dvh;
+  overflow: hidden;
+  background: #fff;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.ticket-vertical-main {
+  width: 100dvw;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+}
+
+.ticket-vertical-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100dvw;
+  padding-top: 3.125dvh;
+  padding-bottom: 7.3dvh;
+}
+
+.ticket-container {
+  background: #fff;
+  border-radius: 1.66dvh;
+  box-shadow: 0 0.2dvh 1.66dvh rgba(0,0,0,0.10);
+  border: 0.1dvh solid #eee;
+  max-width: 31.25dvh;
+  width: 31.25dvh;
+  margin: 0 auto;
+  padding: 2.5dvh 2.08dvh 2.08dvh 2.08dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.66dvh;
+}
+
+.ticket-header {
+  background: #fffbe6;
+  color: #222;
+  width: 100%;
+  padding: 1.66dvh 0 0.9dvh 0;
+  text-align: center;
+  border-bottom: 0.1dvh solid #eee;
+  border-radius: 1.66dvh 1.66dvh 0 0;
+}
+
+.success-icon {
+  width: 4.16dvh;
+  height: 4.16dvh;
+  background: #ffb800;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.9dvh auto;
+}
+
+.success-icon svg {
+  width: 2.5dvh;
+  height: 2.5dvh;
+  color: #fff;
+}
+
+.ticket-title {
+  font-size: 1.83dvh;
+  font-weight: 700;
+  margin-bottom: 0.4dvh;
+}
+
+.ticket-numero-orden {
+  font-size: 2.91dvh;
+  font-weight: 800;
+  color: #ffb800;
+  margin: 0.8dvh 0 0.4dvh 0;
+  text-shadow: 0 0.1dvh 0.2dvh rgba(0,0,0,0.1);
+}
+
+.ticket-subtitle {
+  font-size: 1.08dvh;
+  opacity: 0.9;
+}
+
+.ticket-body {
+  width: 100%;
+  padding: 1.66dvh 0 0.625dvh 0;
+}
+
+.ticket-info {
+  margin-bottom: 1.25dvh;
+  font-size: 1.08dvh;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625dvh 0;
+  border-bottom: 0.05dvh solid #f0f0f0;
+  font-size: 1.1dvh;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.info-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #222;
+  font-weight: 600;
+}
+
+.order-items {
+  margin: 0.93dvh 0 0.5dvh 0;
+  font-size: 1dvh;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5dvh 0;
+  border-bottom: 0.05dvh solid #f0f0f0;
+  font-size: 1dvh;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  flex: 1;
+  color: #444;
+}
+
+.item-quantity {
+  color: #888;
+  margin: 0 0.5dvh;
+}
+
+.item-price {
+  color: #222;
+  font-weight: 600;
+}
+
+/* Footer estilo kiosco */
+footer {
+  width: 100vw;
+  height: 5dvh;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 -0.1dvh 0.83dvh rgba(0,0,0,0.07);
+  padding: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+}
+
+.Footer_Contenedor_Botones {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1dvh;
+  padding: 0;
+}
+
+footer button {
+  width: 44dvw !important;
+  height: 3.75dvh !important;
+  color: white;
+  border: none;
+  border-radius: 0.5dvh;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5dvh;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+
+footer button:hover {
+  transform: translateY(-0.1dvh);
+  box-shadow: 0 0.2dvh 0.4dvh rgba(0, 0, 0, 0.2);
+}
+
+#Boton_Nueva_Compra {
+  background-color: #3A9A53;
+  width: 88dvw !important;
+  height: 3.75dvh !important;
+  font-size: 1.5dvh;
+  font-weight: bold;
+  color: white;
+}
+
+
+#Boton_Descargar_PDF {
+  background-color: #dc3545;
+  color: white;
+  font-weight: 600;
+  position: relative;
+}
+
+#Boton_Descargar_PDF:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+#Boton_Continuar {
+  background-color: #3A9A53;
+}
+
+#Boton_Nueva_Compra {
+  background-color: #3A9A53;
+  font-weight: bold;
+  color: white;
+}
+

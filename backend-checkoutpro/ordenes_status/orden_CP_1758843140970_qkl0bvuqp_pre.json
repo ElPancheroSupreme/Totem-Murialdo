@@ -1,0 +1,31 @@
+{
+    "carrito": [
+        {
+            "id_producto": 12,
+            "nombre": "Aquarius Pomelo 500ml",
+            "cantidad": 1,
+            "precio_unitario": 2000,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Aquarius_Pomelo_500ml.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 21,
+            "nombre": "Agua Villavicencio 500ml",
+            "cantidad": 1,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Agua_Villavicencio_500ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758843140970_qkl0bvuqp",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-25T23:32:20.971Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-25 20:34:13",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-25 20:34:30",
+    "numero_pedido_final": "K-124"
+}

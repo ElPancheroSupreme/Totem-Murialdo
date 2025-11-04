@@ -1,0 +1,82 @@
+📱 Resumen de Integración CheckoutPro de MercadoPago
+🎯 Objetivo Principal
+Implementar una versión móvil del sistema de pagos que use CheckoutPro de MercadoPago en lugar del QR tradicional, manteniendo el mismo flujo de webhook y redirección a ticket.
+
+🏗️ Arquitectura Implementada
+Detección Automática de Dispositivo
+Archivo modificado: metodo_pago.html
+Función agregada: esDispositivoMovil()
+Lógica: Detecta automáticamente dispositivos móviles y redirige a CheckoutPro en lugar de QR
+Criterios de detección:
+User agent (Android, iOS, etc.)
+Pantalla táctil
+Ancho de pantalla ≤ 768px
+Nueva Página de Pago Móvil
+Archivo creado: checkoutpro.html
+Funcionalidad:
+Interfaz móvil optimizada
+Resumen de orden con productos y personalizaciones
+Creación automática de preferencia CheckoutPro
+Redirección automática a la app de MercadoPago (sin botones manuales)
+Polling para verificar estado del pago
+🔧 APIs Backend Creadas
+1. API de Creación de Preferencias
+Archivo: create_checkoutpro.php
+Función: Crear preferencias de CheckoutPro en MercadoPago
+Entrada: Items, external_reference, back_urls
+Salida: init_point para redireccionar a MP
+2. API de Guardado Previo
+Archivo: guardar_orden_previa.php
+Función: Guardar datos del pedido antes del pago
+Propósito: Permitir al webhook recuperar datos cuando llegue la notificación
+🔗 Flujo de Integración Completo
+🎛️ Webhook Existente (Sin Modificaciones)
+Archivo: webhook.php
+Estado: ✅ YA COMPATIBLE con CheckoutPro
+Razón: Ya maneja webhooks tipo payment que es lo que usa CheckoutPro
+Flujo:
+Detecta type: "payment"
+Consulta /v1/payments/{id}
+Obtiene external_reference
+Procesa pago como approved/rejected
+📊 Variables y Configuración
+External Reference Pattern
+Back URLs Configuradas
+Success: ticket.html?ref={external_reference}&source=checkoutpro
+Failure: checkoutpro.html?error=payment_failed
+Pending: checkoutpro.html?status=pending
+Notification URL
+🔄 Estados y Manejo de Errores
+Estados del Pago
+Loading: "Preparando tu pago..."
+Redirecting: "🚀 Abriendo Mercado Pago..."
+Error: "❌ Error" + mensaje específico
+Success: Redirección automática a ticket
+Polling de Estado
+Frecuencia: Cada 3 segundos
+Archivo consultado: ordenes_status/orden_{external_reference}.json
+Condición de éxito: status === 'approved'
+📱 Experiencia de Usuario
+Dispositivos Móviles
+Toca "Mercado Pago" → Va directamente a CheckoutPro
+Ve resumen de orden → Sistema crea preferencia automáticamente
+Ve "Abriendo Mercado Pago..." → Redirección automática en 1.5s
+App MP se abre → Usuario paga
+Regresa automáticamente → Ve ticket impreso
+Dispositivos Desktop/Tótem
+Toca "Mercado Pago" → Va a PaginaQR.html (flujo original)
+Escanea QR → Paga → Flujo normal
+✅ Estado Actual
+✅ Frontend móvil: Completo y funcional
+✅ APIs backend: Creadas y configuradas
+✅ Detección automática: Implementada
+✅ Webhook compatibility: Verificada con webhook existente
+✅ Redirección automática: Implementada
+✅ Pruebas básicas: Webhook de prueba respondió correctamente
+🔧 Configuración Requerida en MercadoPago
+Token de acceso configurado en config.php
+URL de webhook registrada en la aplicación MP
+CheckoutPro habilitado en la cuenta
+La integración está lista para producción y mantiene compatibilidad total con el sistema existente de QR.
+
+

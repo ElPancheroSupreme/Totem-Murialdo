@@ -1,0 +1,44 @@
+{
+    "carrito": [
+        {
+            "id_producto": 24,
+            "nombre": "Alfajor Guaymallen Simple Negro",
+            "cantidad": 1,
+            "precio_unitario": 450,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/3.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758930893262_1sioivf48",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T23:54:53.264Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 20:56:45",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 20:56:54",
+    "webhook_id": "127123128463",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-157",
+    "id_pedido": "230",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 450,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-157",
+        "metodo_pago": "CheckoutPro Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 24,
+                "nombre": "Alfajor Guaymallen Simple Negro",
+                "cantidad": 1,
+                "precio_unitario": 450,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/3.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "450.00"
+    }
+}

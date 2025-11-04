@@ -1,0 +1,45 @@
+{
+    "numero_orden": "K2883",
+    "carrito": [
+        {
+            "id_producto": 98,
+            "nombre": "Bon o Bon Clasico Blanco",
+            "cantidad": 1,
+            "precio_unitario": 600,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/16.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 600,
+    "fecha": "2025-09-26",
+    "hora": "20:55:51",
+    "origen": "kiosco",
+    "external_reference": "qr_68d7280722050",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 20:55:58",
+    "webhook_id": "127122972769",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-156",
+    "id_pedido": "229",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 600,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-156",
+        "metodo_pago": "QR Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 98,
+                "nombre": "Bon o Bon Clasico Blanco",
+                "cantidad": 1,
+                "precio_unitario": 600,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/16.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "600.00"
+    }
+}

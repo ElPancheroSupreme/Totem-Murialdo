@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>¡Gracias por tu compra! - Totem Murialdo</title>
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/Iconos/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/Iconos/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/Iconos/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/Iconos/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/Iconos/android-chrome-512x512.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .final-vertical-main {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #facd15 0%, #f8b500 100%);
+        }
+
+        .final-vertical-content {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            padding: 3.12dvh 1dvh 7.28dvh 1dvh;
+            box-sizing: border-box;
+        }
+
+        .final-container {
+            background: #fff;
+            border-radius: 1.66dvh;
+            box-shadow: 0 0.41dvh 2.5dvh rgba(0,0,0,0.15);
+            border: 0.1dvh solid #eee;
+            max-width: 36.4dvh;
+            width: 36.4dvh;
+            margin: 0 auto;
+            padding: 3.33dvh 2.5dvh 2.5dvh 2.5dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2dvh;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25dvh;
+            margin-bottom: 1dvh;
+        }
+
+        .logo-buffet {
+            width: 6.25dvh;
+            height: 6.25dvh;
+            border-radius: 50%;
+            background: url('../assets/images/Iconos/Logo.png') center/contain no-repeat;
+            background-color: #f8f9fa;
+            border: 0.1dvh solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0.2dvh 1dvh rgba(0,0,0,0.1);
+        }
+
+        .logo-murialdo {
+            width: 6.25dvh;
+            height: 6.25dvh;
+            background: url('../assets/images/Iconos/Imagotipo_Rust.png') center/contain no-repeat;
+            background-color: #f8f9fa;
+            border: 0.1dvh solid #eee;
+            border-radius: 50%;
+            box-shadow: 0 0.2dvh 1dvh rgba(0,0,0,0.1);
+        }
+
+        .final-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.83dvh;
+        }
+
+        .final-title {
+            font-size: 2.66dvh;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .final-subtitle {
+            font-size: 1.5dvh;
+            color: #666;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .final-message {
+            background: #f8f9fa;
+            border-radius: 1dvh;
+            padding: 1.66dvh;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .final-message h3 {
+            font-size: 1.33dvh;
+            color: #2c3e50;
+            margin: 0 0 0.8dvh 0;
+            font-weight: 600;
+        }
+
+        .final-message p {
+            font-size: 1dvh;
+            color: #555;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .Footer_Contenedor_Botones {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(0.5dvh);
+            border-top: 0.1dvh solid #eee;
+            padding: 1.66dvh 2.5dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.25dvh;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .Footer_Contenedor_Botones button {
+            flex: 1;
+            max-width: 15.6dvh;
+            padding: 1dvh 1.66dvh;
+            font-size: 1.16dvh;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.8dvh;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #Boton_Nueva_Compra {
+            background: #facd15;
+            color: #222;
+            border: 2px solid #facd15;
+        }
+
+        #Boton_Nueva_Compra:hover {
+            background: #f8b500;
+            border-color: #f8b500;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(248, 181, 0, 0.3);
+        }
+
+        .thank-you-icon {
+            font-size: 3.33dvh;
+            margin-bottom: 0.8dvh;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-0.5dvh);
+            }
+            60% {
+                transform: translateY(-0.25dvh);
+            }
+        }
+
+        .auto-redirect {
+            margin-top: 1.25dvh;
+            font-size: 0.91dvh;
+            color: #888;
+            font-style: italic;
+        }
+
+        .countdown {
+            font-weight: 600;
+            color: #facd15;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="final-vertical-main">
+        <div class="final-vertical-content">
+            <div class="final-container">
+                <div class="logo-container">
+                    <div class="logo-buffet"></div>
+                    <div class="logo-murialdo"></div>
+                </div>
+                
+                <div class="final-header">
+                    <div class="thank-you-icon">🎉</div>
+                    <h1 class="final-title">¡Gracias por tu compra!</h1>
+                    <p class="final-subtitle">Tu pedido ha sido procesado exitosamente</p>
+                </div>
+
+                <div class="final-message">
+                    <h3>¡Tu experiencia es importante para nosotros!</h3>
+                    <p>Esperamos que disfrutes tu pedido. En el Buffet Murialdino trabajamos cada día para brindarte la mejor experiencia gastronómica.</p>
+                    <br>
+                    <p><strong>¡Te esperamos pronto para una nueva compra!</strong></p>
+                </div>
+
+                <div class="auto-redirect">
+                    Regresando al inicio en <span class="countdown" id="countdown">10</span> segundos...
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="Footer_Contenedor_Botones">
+                <button id="Boton_Nueva_Compra">Nueva compra</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Función para limpiar localStorage y regresar al inicio
+        function nuevaCompra() {
+            // Limpiar localStorage antes de ir a nueva compra
+            localStorage.removeItem('ticket_items');
+            localStorage.removeItem('ticket_total');
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('carrito_total');
+            localStorage.removeItem('external_reference');
+            localStorage.removeItem('numero_orden');
+            localStorage.removeItem('metodo_pago');
+            localStorage.removeItem('origen');
+            window.location.href = 'index.html';
+        }
+
+        // Botón Nueva Compra
+        document.getElementById('Boton_Nueva_Compra').addEventListener('click', nuevaCompra);
+
+        // Contador automático de 10 segundos
+        let seconds = 300;
+        const countdownElement = document.getElementById('countdown');
+        
+        const interval = setInterval(() => {
+            seconds--;
+            countdownElement.textContent = seconds;
+            
+            if (seconds <= 0) {
+                clearInterval(interval);
+                nuevaCompra();
+            }
+        }, 1000);
+
+        // Si el usuario hace clic en cualquier parte de la pantalla, también redirige
+        document.addEventListener('click', (e) => {
+            // Solo si no es el botón (que ya tiene su propio handler)
+            if (e.target.id !== 'Boton_Nueva_Compra') {
+                clearInterval(interval);
+                nuevaCompra();
+            }
+        });
+    </script>
+</body>
+
+</html>

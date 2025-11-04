@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horario Reserva</title>
+    <link rel="stylesheet" href="../assets/style/horario_reserva.css">
+</head>
+<body>
+    <img src="../assets/images/Iconos/Logo.png" alt="">
+    <h1>Elija el horario</h1>
+    <div class="Contenedor_Horarios" id="contenedorHorarios">
+        <!-- Los horarios se cargarán dinámicamente aquí -->
+        <div id="loading-horarios" style="text-align: center; padding: 20px; color: #666;">
+            Cargando horarios disponibles...
+        </div>
+    </div>
+
+    <script>
+        // Función para cargar horarios dinámicamente desde la base de datos
+        async function cargarHorarios() {
+            const contenedor = document.getElementById('contenedorHorarios');
+            const loadingElement = document.getElementById('loading-horarios');
+            
+            try {
+                // Realizar petición al API con ruta relativa
+                const response = await fetch('../../backend/api/obtener_horarios.php');
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    // Limpiar el contenedor
+                    contenedor.innerHTML = '';
+                    
+                    // Crear elementos de horario dinámicamente
+                    data.data.forEach(horario => {
+                        const divHorario = document.createElement('div');
+                        divHorario.className = 'Horario';
+                        divHorario.textContent = horario.texto; // Usar el campo 'texto' de la BD
+                        divHorario.dataset.horarioId = horario.id; // Guardar ID para uso posterior
+                        divHorario.dataset.hora = horario.hora; // Guardar hora para uso posterior
+                        
+                        // Agregar event listener para selección
+                        divHorario.addEventListener('click', function() {
+                            seleccionarHorario(horario);
+                        });
+                        
+                        contenedor.appendChild(divHorario);
+                    });
+                } else {
+                    // No hay horarios disponibles
+                    contenedor.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #999;">
+                            No hay horarios disponibles en este momento.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error al cargar horarios:', error);
+                // Mostrar mensaje de error detallado
+                contenedor.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #ff6b6b;">
+                        <strong>Error al cargar horarios:</strong><br>
+                        ${error.message}<br><br>
+                        <small>Revisa la consola del navegador para más detalles</small>
+                        <br><br>
+                        <button onclick="cargarHorarios()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Reintentar
+                        </button>
+                        <br><br>
+                        <button onclick="probarAPIDirecto()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Probar API directo
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Función para probar el API directamente
+        async function probarAPIDirecto() {
+            console.log('Probando API directo...');
+            
+            // Probar diferentes rutas posibles
+            const rutasPosibles = [
+                '../../backend/api/obtener_horarios.php',
+                '../../../backend/api/obtener_horarios.php',
+                '/Totem_Murialdo/backend/api/obtener_horarios.php',
+                'backend/api/obtener_horarios.php'
+            ];
+            
+            for (const ruta of rutasPosibles) {
+                try {
+                    console.log(`Probando ruta: ${ruta}`);
+                    const response = await fetch(ruta);
+                    console.log(`Ruta ${ruta} - Status:`, response.status);
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        console.log(`Ruta ${ruta} - Response:`, text);
+                        try {
+                            const json = JSON.parse(text);
+                            console.log(`¡Ruta exitosa encontrada!: ${ruta}`, json);
+                            alert(`¡API encontrado en: ${ruta}\nRespuesta: ${JSON.stringify(json, null, 2)}`);
+                            return;
+                        } catch (parseError) {
+                            console.log(`Ruta ${ruta} - No es JSON válido:`, text);
+                        }
+                    }
+                } catch (error) {
+                    console.log(`Ruta ${ruta} - Error:`, error.message);
+                }
+            }
+            
+            alert('No se pudo encontrar el API en ninguna ruta probada. Revisa la consola para más detalles.');
+        }
+        
+        // Función para manejar la selección de horario
+        function seleccionarHorario(horario) {
+            // Remover selección anterior
+            document.querySelectorAll('.Horario').forEach(h => h.classList.remove('selected'));
+            
+            // Marcar como seleccionado
+            event.target.classList.add('selected');
+            
+            // Guardar horario seleccionado en localStorage
+            localStorage.setItem('horario_seleccionado', JSON.stringify({
+                id: horario.id,
+                hora: horario.hora,
+                texto: horario.texto
+            }));
+            
+            console.log('Horario seleccionado:', horario);
+            
+            // Redirigir automáticamente después de la selección
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 500);
+        }
+        
+        // Cargar horarios cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', cargarHorarios);
+    </script>
+</body>
+</html>

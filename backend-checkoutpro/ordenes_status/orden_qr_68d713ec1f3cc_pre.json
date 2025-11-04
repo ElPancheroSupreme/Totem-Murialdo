@@ -1,0 +1,32 @@
+{
+    "numero_orden": "K2059",
+    "carrito": [
+        {
+            "id_producto": 90,
+            "nombre": "Bon o Bon Clasico",
+            "cantidad": 1,
+            "precio_unitario": 600,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/8.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 750,
+    "fecha": "2025-09-26",
+    "hora": "19:30:04",
+    "origen": "kiosco",
+    "external_reference": "qr_68d713ec1f3cc",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 19:30:13",
+    "numero_pedido_final": "K-135"
+}

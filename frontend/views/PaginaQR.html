@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=1080, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+    <title>Pago QR - Mercado Pago</title>
+    <link rel="stylesheet" href="../assets/style/qr.css">
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> -->
+</head>
+
+<body style="background: #fff; width: 100vw; height: 100vh;">
+    <div class="qr-vertical-main">
+        <div class="qr-vertical-content ajustado">
+            <div class="qr-header">
+                <h1>Escanea el código con Mercado Pago</h1>
+            </div>
+            <div class="qr-card-vertical ajustado">
+                <div class="qr-order-summary ajustado">
+                    <div class="qr-order-title">Resumen de tu orden</div>
+                    <div class="qr-order-total">
+                        <span>Total:</span>
+                        <span class="qr-total-amount" id="total-amount">$0</span>
+                    </div>
+                    <ul class="qr-order-items" id="order-items"></ul>
+                </div>
+                <div class="qr-section-vertical ajustado" id="qr-container">
+                    <div class="loader"></div>
+                    <div class="loading-text">Generando QR, por favor espere...</div>
+                </div>
+                <div class="qr-ref-centrada" id="qr-ref-centrada" style="display:none;"></div>
+                <div class="qr-status-message" id="status-message"></div>
+            </div>
+        </div>
+        <footer>
+            <div class="Footer_Contenedor_Botones">
+                <button id="Boton_Cancelar">Cancelar orden</button>
+                <button id="Boton_Continuar">Atrás</button>
+            </div>
+        </footer>
+    </div>
+    <script>
+        // === DETECCIÓN AUTOMÁTICA DE BACKEND ===
+        function detectarBackend() {
+            const currentPath = window.location.pathname;
+            const currentUrl = window.location.href;
+            
+            if (currentPath.includes('/frontend-qr/') || currentUrl.includes('/frontend-qr/')) {
+                return '/Totem_Murialdo/backend-qr';
+            } else if (currentPath.includes('/frontend-checkoutpro/') || currentUrl.includes('/frontend-checkoutpro/')) {
+                return '/Totem_Murialdo/backend-checkoutpro';
+            } else {
+                return '/Totem_Murialdo/backend';
+            }
+        }
+        
+        const BACKEND_API = detectarBackend();
+        console.log('🎯 PaginaQR.html - Backend detectado:', BACKEND_API);
+        
+        // === ELEMENTOS DEL DOM ===
+        const qrContainer = document.getElementById('qr-container');
+        const orderItems = document.getElementById('order-items');
+        const totalAmount = document.getElementById('total-amount');
+        const statusMessage = document.getElementById('status-message');
+        const qrRefCentrada = document.getElementById('qr-ref-centrada');
+        const cancelarBtn = document.getElementById('Boton_Cancelar');
+        const atrasBtn = document.getElementById('Boton_Continuar');
+
+        async function generarQR(amount) {
+            try {
+                qrContainer.innerHTML = `
+                    <div class='loader'></div>
+                    <div class='loading-text'>Generando QR, por favor espere...</div>
+                `;
+                qrRefCentrada.style.display = 'none';
+                const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                let origen = 'kiosco';
+                if (window.location.pathname.toLowerCase().includes('buffet')) {
+                    origen = 'buffet';
+                }
+                const response = await fetch('../../backend/api/back.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, carrito, origen })
+                });
+                let data;
+                let responseClone = response.clone();
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    const text = await responseClone.text();
+                    showError(`Respuesta no JSON del backend:<br>${text}`);
+                    return;
+                }
+                if (data.qr_data) {
+                    qrContainer.innerHTML = `
+                        <div class='qr-success-vertical'>
+                            <img src='https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(data.qr_data)}&size=500x500&margin=10' 
+                                 alt='QR Mercado Pago' class='qr-image-vertical' />
+                        </div>
+                    `;
+                    qrRefCentrada.textContent = data.external_reference || '';
+                    qrRefCentrada.style.display = 'block';
+                    if (data.external_reference) {
+                        localStorage.setItem('external_reference', data.external_reference);
+                        if (data.numero_orden) localStorage.setItem('numero_orden', data.numero_orden);
+                        if (data.origen) localStorage.setItem('origen', data.origen);
+                        iniciarPollingEstadoPago(data.external_reference);
+                    }
+                    showSuccess('QR generado correctamente. Escanea con Mercado Pago para pagar.');
+                } else if (data.error) {
+                    showError(`Error: ${data.error}<br>${data.details ? JSON.stringify(data.details) : ''}`);
+                } else {
+                    showError('Error desconocido. Revisa la consola.');
+                }
+            } catch (err) {
+                showError(`Error de red o del servidor: ${err.message}`);
+            }
+        }
+        function mostrarResumenOrden() {
+            const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+            console.log('🛒 Carrito para mostrar productos:', JSON.stringify(carrito, null, 2));
+            if (carrito.length === 0) {
+                qrContainer.innerHTML = `
+                    <div class='qr-error'>No hay productos en el carrito.</div>
+                    <button class='qr-btn qr-btn-green' onclick="window.location.href='PaginaQR.html'">Volver a la tienda</button>
+                `;
+                qrRefCentrada.style.display = 'none';
+                return false;
+            }
+            // Agrupar productos iguales (nombre, id_producto, personalizaciones)
+            const agrupados = [];
+            carrito.forEach(item => {
+                const key = item.id_producto + '|' + JSON.stringify(item.personalizaciones || []);
+                const existente = agrupados.find(p => p.key === key);
+                if (existente) {
+                    existente.cantidad += item.cantidad;
+                } else {
+                    agrupados.push({ ...item, key });
+                }
+            });
+            let itemsHTML = '';
+            let total = 0;
+            agrupados.forEach(item => {
+                let precioBase = item.precio ?? item.precio_unitario ?? 0;
+                let extras = Array.isArray(item.personalizaciones) ? item.personalizaciones.reduce((acc, p) => acc + (typeof p === 'object' ? (parseFloat(String(p.precio_extra).replace(',', '.')) || 0) : 0), 0) : 0;
+                let subtotal = (Number(precioBase) + extras) * Number(item.cantidad);
+                total += subtotal;
+                let persArr = item.personalizaciones || item.personalizacion || [];
+                let persStr = '';
+                if (Array.isArray(persArr) && persArr.length > 0) {
+                    persStr = `<span style=\"background:#eee; color:#444; border-radius:6px; padding:2px 8px; margin-left:8px; font-size:0.95em;\">${persArr.map(p => p.nombre_opcion || p).join(', ')}</span>`;
+                }
+                itemsHTML += `<li>${item.cantidad} x ${item.nombre}${persStr} <span>$${subtotal.toLocaleString()}</span></li>`;
+            });
+            orderItems.innerHTML = itemsHTML;
+            totalAmount.textContent = `$${total.toLocaleString()}`;
+            return total;
+        }
+        function showSuccess(message) {
+            statusMessage.innerHTML = `<div class='qr-success-message'>${message}</div>`;
+            setTimeout(() => { statusMessage.innerHTML = ''; }, 5000);
+        }
+        function showError(message) {
+            statusMessage.innerHTML = `<div class='qr-error-message'>${message}</div>`;
+        }
+        
+        // Función helper para obtener página de productos según punto de venta
+        function getPaginaProductos() {
+            const puntoVentaNombre = localStorage.getItem('punto_venta_nombre');
+            if (puntoVentaNombre && puntoVentaNombre.toLowerCase() === 'buffet') {
+                return 'buffet.html';
+            }
+            return 'kiosco_dinamico.html';
+        }
+        
+        cancelarBtn.addEventListener('click', function () {
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('carrito_total');
+            window.location.href = getPaginaProductos();
+        });
+        atrasBtn.addEventListener('click', function () {
+            window.location.href = 'metodo_pago.html';
+        });
+        // --- Overlay de mínimo Mercado Pago ---
+        function mostrarOverlayMinimoQR(montoMinimo) {
+            let overlay = document.getElementById('fuera-minimo-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'fuera-minimo-overlay';
+                document.body.appendChild(overlay);
+            }
+            overlay.style.display = 'flex';
+            overlay.style.position = 'fixed';
+            overlay.style.top = 0;
+            overlay.style.left = 0;
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.background = 'rgba(0,0,0,0.85)';
+            overlay.style.zIndex = 9999;
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.innerHTML = `<div style='background:#fff;padding:32px 48px;border-radius:18px;box-shadow:0 4px 32px #0008;text-align:center;max-width:90vw;'>
+      <div style='font-size:2.2rem;margin-bottom:18px;'>💳</div>
+      <div>El monto mínimo para pagar con Mercado Pago es:</div>
+      <div style='font-size:2.2rem;font-weight:bold;margin:10px 0;'>$${montoMinimo.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+      <div style='font-size:1.1rem;margin-top:10px;'>El total de tu pedido es menor al mínimo permitido para Mercado Pago.</div>
+      <button id="btn-volver-minimo-qr" style='margin-top:18px;font-size:1.2rem;padding:8px 32px;border-radius:8px;border:none;background:#facd15;color:#222;cursor:pointer;'>Volver</button>
+    </div>`;
+            setTimeout(() => {
+                const btnVolver = document.getElementById('btn-volver-minimo-qr');
+                if (btnVolver) {
+                    btnVolver.onclick = function () {
+                        window.location.href = getPaginaProductos();
+                    };
+                }
+            }, 50);
+        }
+
+        window.addEventListener('DOMContentLoaded', async function () {
+            const total = mostrarResumenOrden();
+            
+            // Verificar configuración de métodos de pago
+            let metodosHabilitados = { qr: true, efectivo: true };
+            try {
+                const res = await fetch(BACKEND_API + '/admin/api/configuracion_horarios.php');
+                const data = await res.json();
+                if (data && data.success && data.config && data.config.metodos_pago) {
+                    metodosHabilitados = data.config.metodos_pago;
+                }
+            } catch (e) {
+                console.warn('No se pudo cargar configuración de métodos de pago, usando valores por defecto');
+            }
+            
+            // Si QR está deshabilitado, mostrar mensaje y redirigir
+            if (!metodosHabilitados.qr) {
+                qrContainer.innerHTML = `
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; color: #856404; margin-bottom: 15px;">⚠️</div>
+                        <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px;">
+                            Método de Pago No Disponible
+                        </div>
+                        <div style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                            El pago con QR Mercado Pago está temporalmente deshabilitado.
+                        </div>
+                        <button onclick="window.location.href='metodo_pago.html'" 
+                                style="background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-right: 10px;">
+                            Volver a Métodos de Pago
+                        </button>
+                        <button onclick="window.location.href=((localStorage.getItem('punto_venta_nombre') || '').toLowerCase() === 'buffet' ? 'buffet.html' : 'kiosco_dinamico.html')" 
+                                style="background: #00a650; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+                            Volver al Menú
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Obtener monto mínimo desde backend
+            let montoMinimo = 1;
+            try {
+                const res = await fetch(BACKEND_API + '/admin/api/configuracion_horarios.php');
+                const data = await res.json();
+                if (data && data.success && data.config && typeof data.config.monto_minimo_mp !== 'undefined') {
+                    montoMinimo = parseFloat(data.config.monto_minimo_mp);
+                }
+            } catch (e) { }
+            if (total < montoMinimo) {
+                mostrarOverlayMinimoQR(montoMinimo);
+                return;
+            }
+            if (total > 0) {
+                generarQR(total);
+            }
+        });
+        
+        function iniciarPollingEstadoPago(external_reference) {
+            let intentos = 0;
+            const maxIntentos = 60; // 3 minutos
+            const intervalo = setInterval(async () => {
+                intentos++;
+                try {
+                    const resp = await fetch(`../../backend/api/estado_pago.php?external_reference=${encodeURIComponent(external_reference)}`);
+                    const data = await resp.json();
+                    if (data.status === 'approved') {
+                        clearInterval(intervalo);
+                        localStorage.removeItem('external_reference');
+                        
+                        // HACER EXACTAMENTE LO MISMO QUE LA TECLA "C"
+                        const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                        const total = localStorage.getItem('carrito_total') || '0';
+                        console.log('🛒 Carrito al iniciar polling:', JSON.stringify(carrito, null, 2));
+                        console.log('💰 Total al iniciar polling:', total);
+                        
+                        // Si el webhook ya guardó el pedido y tenemos ticket_data, usarlo
+                        if (data.ticket_data && data.ticket_data.numero_orden) {
+                            localStorage.setItem('numero_orden', data.ticket_data.numero_orden);
+                            localStorage.setItem('metodo_pago', data.ticket_data.metodo_pago);
+                            localStorage.setItem('ticket_items', JSON.stringify(data.ticket_data.ticket_items));
+                            localStorage.setItem('ticket_total', data.ticket_data.ticket_total);
+                            console.log('Usando datos del webhook para el ticket');
+                        } else {
+                            // Si no hay ticket_data del webhook, llamar a guardar_pedido.php como respaldo
+                            console.log('No hay datos del webhook, llamando a guardar_pedido.php');
+                            try {
+                                const id_punto_venta = parseInt(localStorage.getItem('punto_venta_id') || '2'); // Buffet=1, Kiosco=2
+                                const res = await fetch(BACKEND_API + '/api/guardar_pedido.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        carrito: carrito, 
+                                        metodo_pago: 'VIRTUAL',     // BD solo acepta VIRTUAL o EFECTIVO
+                                        estado: 'PREPARACION',       // BD solo acepta estos estados
+                                        id_punto_venta: id_punto_venta
+                                    })
+                                });
+                                const pedidoData = await res.json();
+                                if (pedidoData.success) {
+                                    // El backend ya genera el formato correcto B-XXX o K-XXX, usarlo directamente
+                                    let numeroFinal = pedidoData.numero_pedido;
+                                    
+                                    // Solo normalizar si viene en formato incorrecto
+                                    if (numeroFinal && numeroFinal.toString().startsWith('QR-')) {
+                                        const soloNumero = numeroFinal.replace('QR-', '');
+                                        const numLimpio = parseInt(soloNumero) || 0;
+                                        numeroFinal = 'K-' + numLimpio.toString().padStart(3, '0');
+                                        console.log('🔄 Normalizado QR- a:', numeroFinal);
+                                    } else {
+                                        console.log('✅ Usando número del backend:', numeroFinal);
+                                    }
+                                    
+                                    console.log('🛒 Carrito al guardar (ÉXITO):', JSON.stringify(carrito, null, 2));
+                                    localStorage.setItem('numero_orden', numeroFinal);
+                                    localStorage.setItem('metodo_pago', 'QR Mercado Pago'); // Usar formato consistente
+                                    localStorage.setItem('ticket_items', JSON.stringify(carrito));
+                                    localStorage.setItem('ticket_total', total);
+                                    console.log('✅ Pedido guardado desde polling con datos normalizados');
+                                } else {
+                                    console.error('Error al guardar pedido desde polling:', pedidoData.error);
+                                    console.log('🛒 Carrito al guardar (ERROR):', JSON.stringify(carrito, null, 2));
+                                    console.error('❌ NO SE PUEDE GENERAR TICKET - error en base de datos');
+                                    
+                                    // Mostrar mensaje de error sin redirigir
+                                    mostrarErrorBaseDatos();
+                                    clearInterval(intervalo);
+                                    return;
+                                }
+                            } catch (e) {
+                                console.error('Error de conexión al guardar pedido:', e);
+                                console.error('❌ NO SE PUEDE GENERAR TICKET - error de conexión');
+                                
+                                // Mostrar mensaje de error sin redirigir
+                                mostrarErrorConexion();
+                                clearInterval(intervalo);
+                                return;
+                            }
+                        }
+                        
+                        // Solo redirigir si se guardó correctamente
+                        if (localStorage.getItem('numero_orden') && !localStorage.getItem('numero_orden').includes('ERROR')) {
+                            window.location.href = 'ticket.html';
+                        }
+                    }
+                } catch (e) {
+                    // Ignorar errores de red momentáneos
+                }
+                if (intentos >= maxIntentos) {
+                    clearInterval(intervalo);
+                }
+            }, 3000);
+        }
+
+        // === FUNCIONES DE ERROR ===
+        function mostrarErrorBaseDatos() {
+            document.getElementById('status-message').innerHTML = `
+                <div style="background: #ffe6e6; border: 2px solid #ff4444; padding: 20px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; color: #ff4444; margin-bottom: 15px;">⚠️</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px;">
+                        Error en Base de Datos
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                        El pago se procesó correctamente, pero no se pudo registrar el pedido.<br>
+                        Por favor contacta al personal del establecimiento.
+                    </div>
+                    <button onclick="window.location.href=((localStorage.getItem('punto_venta_nombre') || '').toLowerCase() === 'buffet' ? 'buffet.html' : 'kiosco_dinamico.html')" 
+                            style="background: #00a650; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-right: 10px;">
+                        Volver al Menú
+                    </button>
+                    <button onclick="location.reload()" 
+                            style="background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+
+        function mostrarErrorConexion() {
+            document.getElementById('status-message').innerHTML = `
+                <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; color: #856404; margin-bottom: 15px;">🔄</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px;">
+                        Problema de Conexión
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                        No se pudo conectar con el servidor.<br>
+                        El pago se procesó correctamente. Verificando estado...
+                    </div>
+                    <button onclick="window.location.href=((localStorage.getItem('punto_venta_nombre') || '').toLowerCase() === 'buffet' ? 'buffet.html' : 'kiosco_dinamico.html')" 
+                            style="background: #00a650; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-right: 10px;">
+                        Volver al Menú
+                    </button>
+                    <button onclick="location.reload()" 
+                            style="background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>

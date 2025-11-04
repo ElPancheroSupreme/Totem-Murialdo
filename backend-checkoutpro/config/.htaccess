@@ -1,0 +1,19 @@
+# Denegar acceso a todos los archivos de configuración
+Order deny,allow
+Deny from all
+
+# Proteger específicamente archivos sensibles
+<Files "*.pem">
+    Order deny,allow
+    Deny from all
+</Files>
+
+<Files "*.key">
+    Order deny,allow
+    Deny from all
+</Files>
+
+<Files "*.json">
+    Order deny,allow
+    Deny from all
+</Files>

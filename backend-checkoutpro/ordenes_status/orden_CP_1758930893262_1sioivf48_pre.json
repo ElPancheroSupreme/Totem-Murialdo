@@ -1,0 +1,22 @@
+{
+    "carrito": [
+        {
+            "id_producto": 24,
+            "nombre": "Alfajor Guaymallen Simple Negro",
+            "cantidad": 1,
+            "precio_unitario": 450,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/3.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758930893262_1sioivf48",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T23:54:53.264Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 20:56:45",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 20:56:54",
+    "numero_pedido_final": "K-157"
+}

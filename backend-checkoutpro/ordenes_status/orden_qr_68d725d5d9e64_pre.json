@@ -1,0 +1,23 @@
+{
+    "numero_orden": "K8447",
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 150,
+    "fecha": "2025-09-26",
+    "hora": "20:46:29",
+    "origen": "kiosco",
+    "external_reference": "qr_68d725d5d9e64",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 20:46:39",
+    "numero_pedido_final": "K-154"
+}

@@ -1,0 +1,18 @@
+{
+    "carrito": [
+        {
+            "id_producto": 11,
+            "nombre": "Aquarius Pera 500ml",
+            "cantidad": 3,
+            "precio_unitario": 2000,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Aquarius_Pera_500ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1759254227097_7bqh8qh0k",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-30T17:43:47.098Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-30 14:45:39"
+}

@@ -1,0 +1,80 @@
+{
+    "carrito": [
+        {
+            "id_producto": 89,
+            "nombre": "bARRA ROCLE",
+            "cantidad": 1,
+            "precio_unitario": 1600,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/7.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 98,
+            "nombre": "Bon o Bon Clasico Blanco",
+            "cantidad": 1,
+            "precio_unitario": 600,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/16.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 2,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758841911685_gao7nkcje",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-25T23:11:51.686Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-25 20:13:43",
+    "status": "approved",
+    "fecha_pago": "2025-09-25 20:14:04",
+    "webhook_id": "126990549163",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-122",
+    "id_pedido": "195",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 2500,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-122",
+        "metodo_pago": "CheckoutPro Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 89,
+                "nombre": "bARRA ROCLE",
+                "cantidad": 1,
+                "precio_unitario": 1600,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/7.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 98,
+                "nombre": "Bon o Bon Clasico Blanco",
+                "cantidad": 1,
+                "precio_unitario": 600,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/16.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 2,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "2,500.00"
+    }
+}

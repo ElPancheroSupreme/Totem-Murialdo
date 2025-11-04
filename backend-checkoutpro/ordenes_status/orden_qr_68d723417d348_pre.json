@@ -1,0 +1,23 @@
+{
+    "numero_orden": "K3083",
+    "carrito": [
+        {
+            "id_producto": 123,
+            "nombre": "Test",
+            "cantidad": 1,
+            "precio_unitario": "200.00",
+            "es_personalizable": 1,
+            "imagen": "\/Totem_Murialdo\/frontend\/assets\/images\/Kiosco\/Alfajores\/test_2.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 200,
+    "fecha": "2025-09-26",
+    "hora": "20:35:29",
+    "origen": "kiosco",
+    "external_reference": "qr_68d723417d348",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 20:35:47",
+    "numero_pedido_final": "K-150"
+}

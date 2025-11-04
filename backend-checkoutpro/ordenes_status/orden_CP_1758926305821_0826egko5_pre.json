@@ -1,0 +1,31 @@
+{
+    "carrito": [
+        {
+            "id_producto": 91,
+            "nombre": "Mogul Rollo Acido Extreme",
+            "cantidad": 1,
+            "precio_unitario": 700,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/9.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 92,
+            "nombre": "Mogul Piecitos",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/10.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758926305821_0826egko5",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T22:38:25.822Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 19:40:17",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 19:40:32",
+    "numero_pedido_final": "K-139"
+}

@@ -1,0 +1,32 @@
+{
+    "numero_orden": "K4673",
+    "carrito": [
+        {
+            "id_producto": 112,
+            "nombre": "Cafe",
+            "cantidad": 1,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/2.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 111,
+            "nombre": "Medialuna",
+            "cantidad": 1,
+            "precio_unitario": "1100.00",
+            "es_personalizable": 1,
+            "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/1.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 2200,
+    "fecha": "2025-09-26",
+    "hora": "19:33:38",
+    "origen": "kiosco",
+    "external_reference": "qr_68d714c27f7f1",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 19:33:48",
+    "numero_pedido_final": "K-138"
+}

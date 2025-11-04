@@ -1,0 +1,20 @@
+{
+    "carrito": [
+        {
+            "id_producto": 4,
+            "nombre": "Coca Cola 500ml",
+            "precio_unitario": 2000,
+            "cantidad": 1,
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 22,
+            "nombre": "Alfajor Guaymallen Simple Blanco",
+            "precio_unitario": 400,
+            "cantidad": 2,
+            "personalizaciones": []
+        }
+    ],
+    "total": 2800,
+    "external_reference": "qr_test_direct_68b784d8a406e"
+}

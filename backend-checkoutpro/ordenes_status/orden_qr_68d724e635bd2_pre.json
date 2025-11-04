@@ -1,0 +1,23 @@
+{
+    "numero_orden": "K1779",
+    "carrito": [
+        {
+            "id_producto": 9,
+            "nombre": "Fanta 237ml",
+            "cantidad": 1,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Fanta_237ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 1100,
+    "fecha": "2025-09-26",
+    "hora": "20:42:30",
+    "origen": "kiosco",
+    "external_reference": "qr_68d724e635bd2",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 20:42:42",
+    "numero_pedido_final": "K-152"
+}

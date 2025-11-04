@@ -1,0 +1,62 @@
+{
+    "carrito": [
+        {
+            "id_producto": 19,
+            "nombre": "Baggio Multifruta 1L",
+            "cantidad": 1,
+            "precio_unitario": 2400,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Baggio_Multifruta_1L.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758923254284_6ijjh9gkl",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T21:47:34.285Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 18:49:26",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 18:49:38",
+    "webhook_id": "127106476861",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-126",
+    "id_pedido": "199",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 2550,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-126",
+        "metodo_pago": "CheckoutPro Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 19,
+                "nombre": "Baggio Multifruta 1L",
+                "cantidad": 1,
+                "precio_unitario": 2400,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Baggio_Multifruta_1L.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 1,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "2,550.00"
+    }
+}

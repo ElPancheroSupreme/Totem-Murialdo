@@ -1,0 +1,23 @@
+{
+    "numero_orden": "K4343",
+    "carrito": [
+        {
+            "id_producto": 19,
+            "nombre": "Baggio Multifruta 1L",
+            "cantidad": 1,
+            "precio_unitario": 2400,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Baggio_Multifruta_1L.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 2400,
+    "fecha": "2025-09-26",
+    "hora": "20:04:22",
+    "origen": "kiosco",
+    "external_reference": "qr_68d71bf6ec6c1",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 20:04:33",
+    "numero_pedido_final": "K-145"
+}

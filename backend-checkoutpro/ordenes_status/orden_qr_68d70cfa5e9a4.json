@@ -1,0 +1,63 @@
+{
+    "numero_orden": "K3999",
+    "carrito": [
+        {
+            "id_producto": 22,
+            "nombre": "Alfajor Guaymallen Simple Blanco",
+            "cantidad": 1,
+            "precio_unitario": 450,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/1.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 23,
+            "nombre": "Alfajor Guaymallen Triple Blanco",
+            "cantidad": 1,
+            "precio_unitario": 650,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/2.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 1100,
+    "fecha": "2025-09-26",
+    "hora": "19:00:26",
+    "origen": "kiosco",
+    "external_reference": "qr_68d70cfa5e9a4",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 19:00:56",
+    "webhook_id": "127669443358",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-131",
+    "id_pedido": "204",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 1100,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-131",
+        "metodo_pago": "QR Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 22,
+                "nombre": "Alfajor Guaymallen Simple Blanco",
+                "cantidad": 1,
+                "precio_unitario": 450,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/1.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 23,
+                "nombre": "Alfajor Guaymallen Triple Blanco",
+                "cantidad": 1,
+                "precio_unitario": 650,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/2.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "1,100.00"
+    }
+}

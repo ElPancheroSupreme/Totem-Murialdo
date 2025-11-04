@@ -1,0 +1,62 @@
+{
+    "carrito": [
+        {
+            "id_producto": 8,
+            "nombre": "Sprite 237ml",
+            "cantidad": 2,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Sprite_237ml.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 2,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758842653710_rriss36cu",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-25T23:24:13.710Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-25 20:26:06",
+    "status": "approved",
+    "fecha_pago": "2025-09-25 20:26:18",
+    "webhook_id": "127553133844",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-123",
+    "id_pedido": "196",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 2500,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-123",
+        "metodo_pago": "CheckoutPro Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 8,
+                "nombre": "Sprite 237ml",
+                "cantidad": 2,
+                "precio_unitario": 1100,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Sprite_237ml.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 2,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "2,500.00"
+    }
+}

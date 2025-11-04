@@ -1,0 +1,27 @@
+{
+    "carrito": [
+        {
+            "id_producto": 10,
+            "nombre": "Aquarius Manzana 500ml",
+            "cantidad": 1,
+            "precio_unitario": 1800,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Aquarius_Manzana_500ml.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 21,
+            "nombre": "Agua Villavicencio 500ml",
+            "cantidad": 1,
+            "precio_unitario": 1000,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Agua_Villavicencio_500ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1759268216604_kpfitdh15",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-30T21:36:56.608Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-30 18:38:47"
+}

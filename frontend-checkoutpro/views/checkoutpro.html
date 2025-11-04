@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Pago Móvil - Mercado Pago</title>
+    <link rel="stylesheet" href="../assets/style/qr.css">
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100dvw;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .qr-vertical-main {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100dvh;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .qr-vertical-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            /* max-width: 41.66dvh; */
+            max-width: 90dvw;
+        }
+
+        .qr-header {
+            text-align: center;
+            margin-bottom: 1.5dvh;
+        }
+
+        .qr-header h1 {
+            color: #333;
+            margin-bottom: 0.5dvh;
+            font-size: 2dvh;
+            font-weight: 600;
+        }
+
+        .qr-header p {
+            color: #666;
+            font-size: 1dvh;
+            margin: 0;
+        }
+
+        .qr-card-vertical {
+            background: white;
+            border-radius: 1dvh;
+            padding: 2dvh;
+            width: 100%;
+            /* max-width: 31.25dvh; */
+            max-width: 80dvw;
+            box-shadow: 0 1dvh 2dvh rgba(0,0,0,0.1);
+            border: 0.1dvh solid #f0f0f0;
+            box-sizing: border-box;
+        }
+
+        @media (orientation: landscape) {
+            .qr-card-vertical {
+                max-width: 40dvw;
+            }
+            .qr-vertical-content {
+                max-width: 50dvw;
+            }
+        }
+
+
+        .qr-order-summary {
+            background: #f8f9fa;
+            border-radius: 0.78dvh;
+            padding: 1.3dvh;
+            margin-bottom: 1.5dvh;
+            border: 0.05dvh solid #e9ecef;
+        }
+
+        .qr-order-title {
+            font-weight: 600;
+            margin-bottom: 1dvh;
+            color: #333;
+            font-size: 1.25dvh;
+            text-align: center;
+        }
+
+        .qr-order-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5dvh;
+            font-weight: 700;
+            color: #00a650;
+            margin-bottom: 1dvh;
+            padding: 0.78dvh 0;
+            border-top: 0.1dvh solid #e9ecef;
+        }
+
+        .qr-order-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .qr-order-items li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6dvh 0;
+            border-bottom: 0.05dvh solid #e9ecef;
+            font-size: 0.9dvh;
+        }
+
+        .qr-order-items li:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #333;
+            font-size: 0.9dvh;
+        }
+
+        .item-details {
+            color: #666;
+            font-size: 0.79dvh;
+            margin-top: 0.2dvh;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9dvh;
+        }
+
+        .qr-section-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 10.4dvh;
+            background: #f8f9fa;
+            border-radius: 0.78dvh;
+            padding: 1.5dvh;
+            margin-bottom: 1dvh;
+            border: 0.1dvh dashed #ddd;
+        }
+
+        .qr-status-message {
+            text-align: center;
+            margin: 1dvh 0;
+            min-height: 1.5dvh;
+        }
+
+        .qr-success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.78dvh;
+            border-radius: 0.5dvh;
+            border: 0.05dvh solid #c3e6cb;
+            font-size: 0.9dvh;
+        }
+
+        .qr-error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 0.78dvh;
+            border-radius: 0.5dvh;
+            border: 0.05dvh solid #f5c6cb;
+            font-size: 0.9dvh;
+        }
+
+        .loader {
+            width: 3.125dvh;
+            height: 3.125dvh;
+            margin: 1dvh auto;
+            border: 0.3dvh solid #f3f3f3;
+            border-top: 0.3dvh solid #00a650;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            text-align: center;
+            color: #666;
+            font-size: 1dvh;
+            margin-top: 0.78dvh;
+        }
+
+        .qr-ref-centrada {
+            text-align: center;
+            background: #f8f9fa;
+            padding: 0.5dvh;
+            border-radius: 0.4dvh;
+            margin-top: 0.78dvh;
+            font-size: 0.75dvh;
+            color: #666;
+            font-family: monospace;
+        }
+
+        .Footer_Contenedor_Botones {
+            display: flex;
+            gap: 4%;
+            height: 4.2dvh;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .Footer_Contenedor_Botones button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 0.5dvh;
+            font-size: 2.1dvh;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 43%;
+            height: 75%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .Footer_Contenedor_Botones button:hover {
+            background: #0056b3;
+            transform: translateY(-0.1dvh);
+            box-shadow: 0 0.2dvh 0.6dvh rgba(0, 123, 255, 0.3);
+        }
+
+        .Footer_Contenedor_Botones button:active {
+            transform: translateY(0);
+            box-shadow: 0 0.1dvh 0.3dvh rgba(0, 123, 255, 0.2);
+        }
+
+        #Boton_Cancelar {
+            background: #dc3545 !important;
+        }
+
+        #Boton_Cancelar:hover {
+            background: #c82333 !important;
+            box-shadow: 0 0.2dvh 0.6dvh rgba(220, 53, 69, 0.3) !important;
+        }
+
+        #Boton_Continuar {
+            background: #6c757d !important;
+        }
+
+        #Boton_Continuar:hover {
+            background: #5a6268 !important;
+            box-shadow: 0 0.2dvh 0.6dvh rgba(108, 117, 125, 0.3) !important;
+        }
+
+        .mp-logo {
+            width: 7.8dvh;
+            margin-bottom: 1dvh;
+        }
+
+        /* Estilo específico para el estado de carga */
+        .status-loading {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 1dvh;
+            border-radius: 0.78dvh;
+            text-align: center;
+            border: 0.05dvh solid #bbdefb;
+        }
+
+        .status-error {
+            background: #ffebee;
+            color: #d32f2f;
+            padding: 1dvh;
+            border-radius: 0.78dvh;
+            text-align: center;
+            border: 0.05dvh solid #ffcdd2;
+        }
+
+        .status-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 1dvh;
+            border-radius: 0.78dvh;
+            text-align: center;
+            border: 0.05dvh solid #c8e6c9;
+        }        
+
+        @media screen and (max-width: 600px) {
+            .Footer_Contenedor_Botones{
+                height: 6.3dvh;
+                box-shadow: inset 0 0.75dvh 1.5dvh rgba(0, 0, 0, 0.25);
+            }
+        }
+    </style>
+</head>
+
+<body style="background: #fff; width: 100vw; height: 100vh;">
+    <div class="qr-vertical-main">
+        <div class="qr-vertical-content">
+            <div class="qr-header">
+                <img src="https://http2.mlstatic.com/storage/logos-api-admin/0daa1670-8a1b-11ea-8616-c77efd0dc0e0-s-logo-ml.svg" 
+                     alt="Mercado Pago" class="mp-logo">
+                <h1>Pagar con Mercado Pago</h1>
+                <p>Serás redirigido a la app de Mercado Pago</p>
+            </div>
+            <div class="qr-card-vertical">
+                <div class="qr-order-summary">
+                    <div class="qr-order-title">Resumen de tu orden</div>
+                    <div class="qr-order-total">
+                        <span>Total:</span>
+                        <span id="total-amount">$0</span>
+                    </div>
+                    <ul class="qr-order-items" id="order-items"></ul>
+                </div>
+                <div class="qr-section-vertical" id="status-container">
+                    <div class="loader"></div>
+                    <div class="loading-text">Preparando tu pago...</div>
+                </div>
+                <div class="qr-ref-centrada" id="reference-info" style="display: none;">
+                    <strong>Referencia:</strong> <span id="external-reference"></span>
+                </div>
+                <div class="qr-status-message" id="status-message"></div>
+            </div>
+        </div>
+        <div class="Footer_Contenedor_Botones">
+            <button id="Boton_Cancelar" onclick="cancelarOrden()">Cancelar orden</button>
+            <button id="Boton_Continuar" onclick="window.location.href='metodo_pago.html'">Atrás</button>
+        </div>
+    </div>
+
+    <script>
+        let external_reference = null;
+        let preference_id = null;
+        let polling_interval = null;
+
+        // Obtener datos del carrito del localStorage
+        function obtenerDatosCarrito() {
+            try {
+                const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                return { carrito };
+            } catch (error) {
+                console.error('Error obteniendo datos del carrito:', error);
+                return { carrito: [] };
+            }
+        }
+
+        // Mostrar resumen de la orden
+        function mostrarResumenOrden() {
+            const { carrito } = obtenerDatosCarrito();
+            
+            console.log('=== MOSTRAR RESUMEN ORDEN ===');
+            console.log('Carrito obtenido:', carrito);
+            console.log('Cantidad de items:', carrito.length);
+            
+            const itemsContainer = document.getElementById('order-items');
+            itemsContainer.innerHTML = '';
+            
+            let totalCalculado = 0;
+            
+            carrito.forEach((item, index) => {
+                console.log(`Item ${index}:`, item);
+                
+                const li = document.createElement('li');
+                
+                // ASEGURAR QUE LOS PRECIOS SEAN NUMÉRICOS
+                let precio_base = parseFloat(item.precio_unitario) || 0;
+                let cantidad = parseInt(item.cantidad) || 1;
+                let itemTotal = precio_base * cantidad;
+                let detalles = `${cantidad} x ${item.nombre}`;
+                
+                if (item.personalizaciones && item.personalizaciones.length > 0) {
+                    item.personalizaciones.forEach(pers => {
+                        const precio_extra = parseFloat(pers.precio_extra) || 0;
+                        itemTotal += precio_extra * cantidad;
+                        detalles += ` + ${pers.nombre_opcion}`;
+                        console.log(`  Personalización: ${pers.nombre_opcion}, precio_extra: ${precio_extra}`);
+                    });
+                }
+                
+                totalCalculado += itemTotal;
+                console.log(`  Item total: ${itemTotal}, Total acumulado: ${totalCalculado}`);
+                
+                li.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${item.nombre}</div>
+                        <div class="item-details">Cantidad: ${cantidad}${item.personalizaciones && item.personalizaciones.length > 0 ? ' + ' + item.personalizaciones.map(p => p.nombre_opcion).join(', ') : ''}</div>
+                    </div>
+                    <div class="item-price">$${itemTotal.toFixed(2)}</div>
+                `;
+                
+                itemsContainer.appendChild(li);
+            });
+            
+            // Actualizar el total con el valor calculado
+            document.getElementById('total-amount').textContent = `$${totalCalculado.toLocaleString()}`;
+            
+            // Guardar el total calculado en localStorage para usarlo después
+            // IMPORTANTE: ticket.html espera un string, no un número
+            localStorage.setItem('carrito_total', totalCalculado.toString());
+            
+            console.log('Total final calculado:', totalCalculado);
+            console.log('Total guardado en carrito_total:', localStorage.getItem('carrito_total'));
+            
+            return totalCalculado;
+        }
+
+        // Crear CheckoutPro
+        async function crearCheckoutPro() {
+            try {
+                const { carrito } = obtenerDatosCarrito();
+                
+                if (carrito.length === 0) {
+                    throw new Error('El carrito está vacío');
+                }
+
+                // Generar external_reference único
+                external_reference = 'CP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                console.log('Creando CheckoutPro con external_reference:', external_reference);
+
+                // Guardar datos del carrito en localStorage como backup
+                localStorage.setItem('checkout_backup_carrito', JSON.stringify(carrito));
+                localStorage.setItem('checkout_backup_reference', external_reference);
+
+                // Preparar items para MercadoPago - FIX DEFINITIVO
+                const items = carrito.map((item, index) => {
+                    console.log(`🔧 Procesando item ${index}:`, item);
+                    
+                    // CONVERSIÓN ROBUSTA DEL PRECIO BASE
+                    let unit_price = 0;
+                    if (item.precio_unitario !== null && item.precio_unitario !== undefined) {
+                        if (typeof item.precio_unitario === 'string') {
+                            // Limpiar string: remover espacios, cambiar coma por punto
+                            let cleanPrice = item.precio_unitario.toString().trim().replace(',', '.');
+                            unit_price = parseFloat(cleanPrice) || 0;
+                        } else {
+                            unit_price = Number(item.precio_unitario) || 0;
+                        }
+                    }
+                    
+                    console.log(`💰 Precio base procesado: ${unit_price} (tipo: ${typeof unit_price})`);
+                    
+                    let title = String(item.nombre || 'Producto');
+                    
+                    // PROCESAR PERSONALIZACIONES
+                    if (item.personalizaciones && Array.isArray(item.personalizaciones)) {
+                        const personalizaciones_nombres = [];
+                        
+                        item.personalizaciones.forEach(pers => {
+                            if (pers && typeof pers === 'object') {
+                                // Agregar nombre de personalización
+                                if (pers.nombre_opcion) {
+                                    personalizaciones_nombres.push(pers.nombre_opcion);
+                                }
+                                
+                                // Procesar precio extra
+                                if (pers.precio_extra !== null && pers.precio_extra !== undefined) {
+                                    let precio_extra = 0;
+                                    if (typeof pers.precio_extra === 'string') {
+                                        let cleanExtra = pers.precio_extra.toString().trim().replace(',', '.');
+                                        precio_extra = parseFloat(cleanExtra) || 0;
+                                    } else {
+                                        precio_extra = Number(pers.precio_extra) || 0;
+                                    }
+                                    unit_price += precio_extra;
+                                    console.log(`  + Personalización: ${pers.nombre_opcion}, extra: ${precio_extra}`);
+                                }
+                            }
+                        });
+                        
+                        if (personalizaciones_nombres.length > 0) {
+                            title += ` (${personalizaciones_nombres.join(', ')})`;
+                        }
+                    }
+                    
+                    // VALIDACIONES FINALES ESTRICTAS
+                    unit_price = Number(unit_price);
+                    if (!Number.isFinite(unit_price) || unit_price < 0) {
+                        console.error(`❌ Precio inválido en item ${index}, usando 0`);
+                        unit_price = 0;
+                    }
+                    
+                    let quantity = Number(item.cantidad);
+                    if (!Number.isInteger(quantity) || quantity < 1) {
+                        console.error(`❌ Cantidad inválida en item ${index}, usando 1`);
+                        quantity = 1;
+                    }
+                    
+                    // CREAR ITEM FINAL
+                    const mpItem = {
+                        title: title,
+                        quantity: quantity,
+                        unit_price: Math.round(unit_price * 100) / 100, // Redondear a centavos
+                        currency_id: 'ARS'
+                    };
+                    
+                    console.log(`✅ Item ${index} final para MP:`, mpItem);
+                    
+                    return mpItem;
+                });
+
+                // Datos para crear la preferencia
+                const id_punto_venta = parseInt(localStorage.getItem('punto_venta_id') || '2'); // Buffet=1, Kiosco=2
+                const preferenceData = {
+                    items: items,
+                    external_reference: external_reference,
+                    id_punto_venta: id_punto_venta, // Agregar punto de venta
+                    back_urls: {
+                        success: `${window.location.origin}/Totem_Murialdo/frontend-checkoutpro/views/Ticket.html?ref=${external_reference}&source=checkoutpro`,
+                        failure: `${window.location.origin}/Totem_Murialdo/frontend-checkoutpro/views/checkoutpro.html?error=payment_failed`,
+                        pending: `${window.location.origin}/Totem_Murialdo/frontend-checkoutpro/views/checkoutpro.html?status=pending`
+                    },
+                    auto_return: 'approved',
+                    payment_methods: {
+                        excluded_payment_types: [
+                            // Opcional: excluir ciertos métodos si es necesario
+                        ]
+                    },
+                    notification_url: `https://ilm2025.webhop.net/Totem_Murialdo/backend-checkoutpro/api/webhook.php?source=checkoutpro`
+                };
+
+                // VALIDACIÓN FINAL SIMPLE
+                console.log('🔍 Items preparados para MercadoPago:', items);
+                
+                console.log('📤 Enviando datos para crear preferencia:', preferenceData);
+
+                // Intentar guardar datos del pedido antes de crear la preferencia
+                try {
+                    await guardarDatosPrevios();
+                } catch (error) {
+                    console.warn('No se pudieron guardar datos previos, continuando...', error);
+                }
+
+                // Crear preferencia en el backend
+                const response = await fetch('../../backend-checkoutpro/api/create_checkoutpro.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(preferenceData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Respuesta del servidor:', data);
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Error al crear la preferencia');
+                }
+
+                // Capturar el preference_id devuelto por la API
+                preference_id = data.preference_id;
+                console.log('Preference ID asignado:', preference_id);
+
+                // Mostrar enlace de pago
+                const checkoutLink = document.getElementById('checkout-link');
+                if (checkoutLink) {
+                    checkoutLink.href = data.init_point;
+                }
+
+                // GUARDAR MÉTODO DE PAGO CORRECTO DESDE EL INICIO
+                localStorage.setItem('metodo_pago', 'CheckoutPro Mercado Pago');
+                console.log('✅ Método de pago guardado: CheckoutPro Mercado Pago');
+
+                // Actualizar estado - mostrando que estamos abriendo la app
+                const statusContainer = document.getElementById('status-container');
+                statusContainer.className = 'qr-section-vertical status-loading';
+                statusContainer.innerHTML = `
+                    <div>🚀 Abriendo Mercado Pago...</div>
+                    <div style="font-size: 0.8dvh; margin-top: 0.5dvh;">
+                        Te estamos redirigiendo automáticamente
+                    </div>
+                `;
+
+                // Mostrar referencia
+                document.getElementById('external-reference').textContent = external_reference;
+                document.getElementById('reference-info').style.display = 'block';
+
+                // Mostrar mensaje de éxito
+                showSuccess('Redirigiendo a Mercado Pago...');
+
+                // REDIRIGIR AUTOMÁTICAMENTE a la app de MercadoPago
+                console.log('Redirigiendo automáticamente a:', data.init_point);
+                setTimeout(() => {
+                    window.location.href = data.init_point;
+                }, 1500); // Comentario arreglado/ Pequeña pausa para que el usuario vea el mensaje
+
+                // Iniciar polling para verificar el pago
+                iniciarPolling();
+
+            } catch (error) {
+                console.error('Error creando CheckoutPro:', error);
+                mostrarError(error.message);
+            }
+        }
+
+        // Guardar datos previos del pedido - USANDO ENDPOINT ROBUSTO
+        async function guardarDatosPrevios() {
+            try {
+                const { carrito } = obtenerDatosCarrito();
+                
+                // Obtener datos de reserva desde localStorage
+                const es_reserva = localStorage.getItem('es_reserva') || '0';
+                const horario_seleccionado = JSON.parse(localStorage.getItem('horario_seleccionado') || 'null');
+                
+                // Solo usar id_horario si es_reserva = 1
+                const es_reserva_int = parseInt(es_reserva);
+                const id_horario = (es_reserva_int === 1 && horario_seleccionado) ? horario_seleccionado.id : null;
+                
+                const datosOrden = {
+                    carrito: carrito,
+                    external_reference: external_reference,
+                    tipo_pago: 'checkoutpro',
+                    fecha_creacion: new Date().toISOString(),
+                    estado: 'pendiente',
+                    es_reserva: es_reserva_int,
+                    id_horario: id_horario
+                };
+
+                console.log('Guardando datos previos con endpoint robusto...', datosOrden);
+
+                const response = await fetch('../../backend-checkoutpro/api/guardar_orden_ultra_simple.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datosOrden)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error HTTP guardando datos previos:', response.status, errorText);
+                    return; // No fallar, continuar sin datos previos
+                }
+
+                const result = await response.json();
+                if (!result.success) {
+                    console.error('Error guardando datos previos:', result.error);
+                } else {
+                    console.log('✅ Datos previos guardados exitosamente');
+                }
+            } catch (error) {
+                console.error('Error en guardarDatosPrevios:', error);
+                // No fallar el proceso, continuar sin datos previos
+            }
+        }
+
+        // SISTEMA HÍBRIDO INTELIGENTE - Webhook + Polling optimizado
+        function iniciarPolling() {
+            console.log('🚀 Iniciando sistema híbrido para:', external_reference);
+            console.log('🎯 Webhook principal + Polling inteligente como respaldo');
+            
+            if (polling_interval) {
+                clearInterval(polling_interval);
+            }
+
+            let attempt_count = 0;
+            const max_attempts = 30; // 30 intentos máximo
+            const intervals = [3000, 5000, 10000, 15000, 30000]; // Intervalos inteligentes
+            
+            function getInterval() {
+                if (attempt_count < 5) return intervals[0];      // 3s primeros 5
+                if (attempt_count < 10) return intervals[1];     // 5s siguientes 5
+                if (attempt_count < 15) return intervals[2];     // 10s siguientes 5
+                if (attempt_count < 25) return intervals[3];     // 15s siguientes 10
+                return intervals[4];                              // 30s resto
+            }
+            
+            async function verificarPago() {
+                attempt_count++;
+                const currentInterval = getInterval();
+                
+                console.log(`🔍 Verificación ${attempt_count}/${max_attempts} - Próxima en ${currentInterval/1000}s`);
+                
+                try {
+                    // USAR CHECKER ROBUSTO OPTIMIZADO
+                    const response = await fetch(`../../backend-checkoutpro/api/checkoutpro_robust_checker.php?external_reference=${external_reference}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        console.warn(`❌ Error HTTP ${response.status} en verificación`);
+                        return programarSiguiente();
+                    }
+                    
+                    const result = await response.json();
+                    console.log(`📊 Resultado verificación ${attempt_count}:`, result);
+                    
+                    if (result.success) {
+                        if (result.status === 'approved' && result.processed) {
+                            // ¡ÉXITO! Pago procesado
+                            console.log(`🎉 PAGO PROCESADO en intento ${attempt_count}`);
+                            console.log('📋 Datos completos del resultado:', result);
+                            console.log('📋 Processing result:', result.processing_result);
+                            
+                            clearInterval(polling_interval);
+                            mostrarExitoFinal({
+                                order_id: result.processing_result?.id_pedido,
+                                numero_pedido: result.processing_result?.numero_pedido,
+                                status: 'payment_verified',
+                                source: result.source,
+                                attempts: attempt_count,
+                                full_result: result // Pasar resultado completo para debugging
+                            });
+                            return;
+                            
+                        } else if (result.status === 'approved' && !result.processed) {
+                            console.log(`✅ Pago aprobado, aún procesando...`);
+                            
+                        } else {
+                            console.log(`⏳ Pago pendiente: ${result.status}`);
+                        }
+                    } else {
+                        console.warn(`⚠️ Error en verificación:`, result.error);
+                    }
+                    
+                } catch (error) {
+                    console.error(`❌ Error en verificación ${attempt_count}:`, error);
+                }
+                
+                // Verificar límite de intentos
+                if (attempt_count >= max_attempts) {
+                    console.log(`⏰ Máximo de intentos alcanzado (${max_attempts})`);
+                    clearInterval(polling_interval);
+                    mostrarTimeoutError();
+                    return;
+                }
+                
+                programarSiguiente();
+            }
+            
+            function programarSiguiente() {
+                const nextInterval = getInterval();
+                polling_interval = setTimeout(verificarPago, nextInterval);
+                
+                // Actualizar UI con progreso
+                updatePollingUI(attempt_count, max_attempts, nextInterval);
+            }
+            
+            function updatePollingUI(current, total, nextInterval) {
+                const progress = Math.round((current / total) * 100);
+                const statusContainer = document.getElementById('status-container');
+                statusContainer.className = 'qr-section-vertical status-loading';
+                statusContainer.innerHTML = `
+                    <div>🔄 Verificando pago...</div>
+                    <div style="font-size: 0.8dvh; margin-top: 0.5dvh;">
+                        Intento ${current} de ${total} - Próximo en ${nextInterval/1000}s
+                    </div>
+                    <div style="background: #ddd; height: 0.4dvh; border-radius: 0.2dvh; margin-top: 0.5dvh; width: 100%;">
+                        <div style="background: #00a650; height: 100%; width: ${progress}%; border-radius: 0.2dvh; transition: width 0.3s;"></div>
+                    </div>
+                `;
+            }
+            
+            function mostrarTimeoutError() {
+                const statusContainer = document.getElementById('status-container');
+                statusContainer.className = 'qr-section-vertical status-error';
+                statusContainer.innerHTML = `
+                    <div>⏰ Tiempo de espera agotado</div>
+                    <div style="font-size: 0.8dvh; margin-top: 0.5dvh;">
+                        No pudimos confirmar el pago automáticamente. 
+                        Si realizaste el pago, aparecerá en el sistema en breve.
+                    </div>
+                    <button onclick="location.reload()" style="margin-top: 0.5dvh; padding: 0.5dvh 1dvh; background: #007bff; color: white; border: none; border-radius: 0.25dvh; cursor: pointer;">
+                        🔄 Intentar nuevamente
+                    </button>
+                `;
+            }
+            
+            // Iniciar primera verificación inmediata
+            verificarPago();
+        }
+        
+        function mostrarExitoFinal(data) {
+            console.log('🎉 Mostrando éxito final con data:', data);
+            
+            // OBTENER DATOS DEL CARRITO - usar backup si es necesario
+            let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+            let total = localStorage.getItem('carrito_total') || '0';
+            
+            // Si el carrito está vacío, usar backup
+            if (carrito.length === 0) {
+                const backupCarrito = localStorage.getItem('checkout_backup_carrito');
+                if (backupCarrito) {
+                    carrito = JSON.parse(backupCarrito);
+                    console.log('Usando carrito de backup:', carrito);
+                }
+            }
+            
+            // Calcular total si no lo tenemos
+            if (!total || total === '0') {
+                let totalCalculado = 0;
+                carrito.forEach(item => {
+                    let itemTotal = (item.precio || item.precio_unitario || 0) * item.cantidad;
+                    if (item.personalizaciones) {
+                        item.personalizaciones.forEach(pers => {
+                            itemTotal += (pers.precio_extra || 0) * item.cantidad;
+                        });
+                    }
+                    totalCalculado += itemTotal;
+                });
+                total = totalCalculado.toString();
+            }
+            
+            console.log('Datos finales - Carrito:', carrito, 'Total:', total);
+            
+            // Preparar datos para el ticket - BUSCAR número en múltiples lugares
+            let numeroOrden = data.numero_pedido;
+            
+            console.log('🔍 DEBUGGING - Buscando numero_pedido:');
+            console.log('  - data.numero_pedido:', data.numero_pedido);
+            console.log('  - data.full_result?.processing_result?.numero_pedido:', data.full_result?.processing_result?.numero_pedido);
+            console.log('  - data.full_result?.data?.numero_pedido:', data.full_result?.data?.numero_pedido);
+            
+            // Si no tenemos el número, buscar en múltiples ubicaciones
+            if (!numeroOrden) {
+                console.warn('⚠️ No se recibió numero_pedido directamente, buscando en otras ubicaciones...');
+                
+                // Intentar desde full_result.processing_result
+                if (data.full_result?.processing_result?.numero_pedido) {
+                    numeroOrden = data.full_result.processing_result.numero_pedido;
+                    console.log('✅ Número encontrado en full_result.processing_result:', numeroOrden);
+                }
+                // Intentar desde full_result.data
+                else if (data.full_result?.data?.numero_pedido) {
+                    numeroOrden = data.full_result.data.numero_pedido;
+                    console.log('✅ Número encontrado en full_result.data:', numeroOrden);
+                }
+                // Intentar desde ticket_data
+                else if (data.ticket_data && data.ticket_data.numero_orden) {
+                    numeroOrden = data.ticket_data.numero_orden;
+                    console.log('✅ Número obtenido desde ticket_data:', numeroOrden);
+                } else {
+                    // Como último recurso, marcar como temporal para que Ticket.html lo busque
+                    console.error('❌ NO SE PUDO OBTENER NÚMERO DEL BACKEND');
+                    numeroOrden = `TEMP-CHECKOUT-${Date.now().toString().substr(-6)}`;
+                    console.warn('⚠️ Usando número temporal, Ticket.html deberá buscarlo en BD:', numeroOrden);
+                }
+            } else {
+                console.log('✅ Número correcto del backend recibido directamente:', numeroOrden);
+            }
+            
+            const metodoPago = `CheckoutPro Mercado Pago${data.source ? ` (${data.source})` : ''}`;
+            
+            localStorage.setItem('numero_orden', numeroOrden);
+            localStorage.setItem('metodo_pago', metodoPago);
+            localStorage.setItem('ticket_items', JSON.stringify(carrito));
+            localStorage.setItem('ticket_total', total.toString());
+            
+            console.log('✅ Datos del ticket preparados:');
+            console.log('  - Número:', numeroOrden);
+            console.log('  - Método:', metodoPago);
+            console.log('  - External ref:', external_reference);
+            console.log('  - Intentos necesarios:', data.attempts || 'N/A');
+            console.log('  - Source:', data.source || 'unknown');
+            console.log('  - Datos completos recibidos:', data);
+            
+            // Verificar si el número es temporal
+            if (numeroOrden && (numeroOrden.startsWith('CP-') || numeroOrden.startsWith('TEMP-'))) {
+                console.warn('⚠️ NÚMERO TEMPORAL DETECTADO:', numeroOrden);
+                console.warn('⚠️ El ticket mostrará un número incorrecto');
+                console.warn('⚠️ Verificar que el backend esté enviando numero_pedido correctamente');
+            }
+            
+            // Mostrar éxito con información del sistema híbrido
+            const statusContainer = document.getElementById('status-container');
+            statusContainer.className = 'qr-section-vertical status-success';
+            
+            let sourceMessage = '';
+            if (data.source === 'local_file') {
+                sourceMessage = 'Webhook instantáneo ⚡';
+            } else if (data.source === 'api_polling') {
+                sourceMessage = `Polling inteligente (${data.attempts || 'N/A'} intentos) 🔄`;
+            } else {
+                sourceMessage = 'Sistema híbrido ✅';
+            }
+            
+            statusContainer.innerHTML = `
+                <div>🎉 ¡Pago Procesado!</div>
+                <div style="font-size: 0.8dvh; margin-top: 0.5dvh;">
+                    <strong>Número:</strong> ${numeroOrden}<br>
+                    <strong>Método:</strong> ${sourceMessage}<br>
+                    Generando ticket...
+                </div>
+            `;
+            
+            // Limpiar carrito y backups DESPUÉS de guardar los datos
+            setTimeout(() => {
+                localStorage.removeItem('carrito');
+                localStorage.removeItem('total');
+                localStorage.removeItem('carrito_total');
+                localStorage.removeItem('checkout_backup_carrito');
+                localStorage.removeItem('checkout_backup_reference');
+                
+                // Redirigir a ticket
+                window.location.href = `/Totem_Murialdo/frontend-checkoutpro/views/Ticket.html?ref=${external_reference}&source=checkoutpro`;
+            }, 2000);
+        }
+
+
+        // Mostrar error
+        function mostrarError(mensaje) {
+            const statusContainer = document.getElementById('status-container');
+            statusContainer.className = 'qr-section-vertical status-error';
+            statusContainer.innerHTML = `
+                <div>❌ Error</div>
+                <div style="font-size: 0.8dvh; margin-top: 0.5dvh;">${mensaje}</div>
+            `;
+            showError(mensaje);
+        }
+
+        // Funciones de mensajes (como en PaginaQR.html)
+        function showSuccess(message) {
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.innerHTML = `<div class='qr-success-message'>${message}</div>`;
+            setTimeout(() => { statusMessage.innerHTML = ''; }, 5000);
+        }
+
+        function showError(message) {
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.innerHTML = `<div class='qr-error-message'>${message}</div>`;
+        }
+
+        // Manejar parámetros de URL (para errores o estados)
+        function manejarParametrosURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.has('error')) {
+                const error = urlParams.get('error');
+                if (error === 'payment_failed') {
+                    mostrarError('El pago fue rechazado. Por favor intenta nuevamente.');
+                }
+            } else if (urlParams.has('status')) {
+                const status = urlParams.get('status');
+                if (status === 'pending') {
+                    mostrarError('El pago está pendiente. Por favor verifica en tu app de Mercado Pago.');
+                }
+            }
+        }
+
+        // Cancelar orden
+        function cancelarOrden() {
+            if (polling_interval) {
+                clearInterval(polling_interval);
+            }
+            
+            // Limpiar datos si es necesario
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('total');
+            
+            // Volver al menú principal (dinámico según punto de venta)
+            const puntoVentaNombre = localStorage.getItem('punto_venta_nombre');
+            if (puntoVentaNombre && puntoVentaNombre.toLowerCase() === 'buffet') {
+                window.location.href = 'buffet.html';
+            } else {
+                window.location.href = 'kiosco_dinamico.html';
+            }
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== INICIALIZANDO CHECKOUTPRO ===');
+            
+            // Debug: verificar datos del carrito al iniciar
+            const carritoInicial = JSON.parse(localStorage.getItem('carrito') || '[]');
+            console.log('Carrito inicial:', carritoInicial);
+            
+            mostrarResumenOrden();
+            manejarParametrosURL();
+            
+            // Solo crear checkout si no hay errores en la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('error') && !urlParams.has('status')) {
+                crearCheckoutPro();
+            }
+        });
+
+        // Limpiar interval al cerrar la página
+        window.addEventListener('beforeunload', function() {
+            if (polling_interval) {
+                clearInterval(polling_interval);
+            }
+        });
+    </script>
+</body>
+
+</html>

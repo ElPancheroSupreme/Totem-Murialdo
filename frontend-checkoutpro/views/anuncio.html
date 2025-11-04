@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Suspensión - Video</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh; background: #000; overflow: hidden;
+        }
+        video {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <video src="../videos/VideoPromos.mp4" autoplay loop muted playsinline></video>
+    <script>
+        // Limpiar carrito y datos del localStorage al entrar por inactividad
+        function limpiarCarrito() {
+            // Limpiar todos los datos del carrito y pedido
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('ticket_items');
+            localStorage.removeItem('ticket_total');
+            localStorage.removeItem('numero_orden');
+            localStorage.removeItem('metodo_pago');
+            localStorage.removeItem('qr_payment_data');
+            localStorage.removeItem('payment_preference_id');
+            localStorage.removeItem('current_order_id');
+            
+            // Limpiar cualquier otro dato temporal que pueda existir
+            localStorage.removeItem('selected_category');
+            localStorage.removeItem('user_session');
+            
+            console.log('🧹 Carrito y localStorage limpiados por inactividad');
+        }
+        
+        // Limpiar al cargar la página (por inactividad)
+        window.addEventListener('DOMContentLoaded', () => {
+            limpiarCarrito();
+        });
+        
+        // Funciones para regresar al inicio
+        function volverAlInicio() {
+            // Limpiar una vez más antes de redireccionar
+            limpiarCarrito();
+            window.location.href = '/Totem_Murialdo/frontend-checkoutpro/views/index.html';
+        }
+        
+        document.addEventListener('click', volverAlInicio);
+        document.addEventListener('touchstart', volverAlInicio);
+    </script>
+</body>
+</html>
+

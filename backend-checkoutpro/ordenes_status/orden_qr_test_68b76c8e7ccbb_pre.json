@@ -1,0 +1,16 @@
+{
+    "numero_orden": "K9538",
+    "carrito": [
+        {
+            "id": 1,
+            "nombre": "Test Product",
+            "precio": 100,
+            "cantidad": 1
+        }
+    ],
+    "total": 100,
+    "fecha": "2025-09-02",
+    "hora": "22:15:42",
+    "origen": "kiosco",
+    "external_reference": "qr_test_68b76c8e7ccbb"
+}

@@ -1,0 +1,23 @@
+{
+    "numero_orden": "K3428",
+    "carrito": [
+        {
+            "id_producto": 83,
+            "nombre": "Mogul Tiburones",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/1.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 900,
+    "fecha": "2025-09-26",
+    "hora": "21:07:14",
+    "origen": "kiosco",
+    "external_reference": "qr_68d72ab2c6a80",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 21:07:23",
+    "numero_pedido_final": "K-160"
+}

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewpo            // Obtener datos del localStorage con debugging
+            let items = JSON.parse(localStorage.getItem('ticket_items') || '[]');
+            let totalString = localStorage.getItem('ticket_total') || '0';
+            let numeroOrden = localStorage.getItem('numero_orden') || '';
+            let metodoPago = localStorage.getItem('metodo_pago') || 'QR Mercado Pago';
+            
+            console.log('📋 Datos iniciales del localStorage:');
+            console.log('- ticket_items:', items);
+            console.log('- ticket_total (string):', totalString);
+            console.log('- numero_orden:', numeroOrden);
+            console.log('- metodo_pago:', metodoPago);
+            
+            // Si no tenemos número de orden pero tenemos external_reference en URL, generarlo
+            if (!numeroOrden && external_reference) {
+                numeroOrden = 'CP-' + external_reference.replace('CP_', '').substr(0, 10);
+                localStorage.setItem('numero_orden', numeroOrden);
+                console.log('🔧 Número de orden generado desde URL:', numeroOrden);
+            }
+            
+            // Solo usar generarKID() como último recurso si realmente no hay nada
+            if (!numeroOrden) {
+                numeroOrden = generarKID();
+                console.log('⚠️ Usando número temporal:', numeroOrden);
+            }t="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ticket de Pago - Mercado Pago</title>
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/Iconos/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/Iconos/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/Iconos/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/Iconos/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/Iconos/android-chrome-512x512.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/style/ticket.css">
+    <script src="../test/qz-tray.js"></script>
+    <script src="../test/qz-config-final.js"></script>
+</head>
+
+<body>
+    <div class="ticket-vertical-main">
+        <div class="ticket-vertical-content">
+            <div class="ticket-container">
+                <div class="ticket-header">
+                    <div class="ticket-title">¡Pago Exitoso!</div>
+                    <div class="ticket-numero-orden" id="numero-orden">K0000</div>
+                    <div class="ticket-subtitle">Retirá tu pedido con este número</div>
+                </div>
+                <div class="ticket-body">
+                    <div class="ticket-info">
+                        <div class="info-row">
+                            <span class="info-label">Fecha:</span>
+                            <span class="info-value" id="fecha">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Hora:</span>
+                            <span class="info-value" id="hora">-</span>
+                        </div>
+                        <div class="info-row" style="display: none;">
+                            <span class="info-value" id="referencia">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Método de pago:</span>
+                            <span class="info-value">QR Mercado Pago</span>
+                        </div>
+                    </div>
+                    <div class="order-items" id="order-items"></div>
+                    <div class="info-row total-row">
+                        <span class="info-label">Total pagado:</span>
+                        <span class="info-value" id="total-pagado">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div class="Footer_Contenedor_Botones">
+                <button id="Boton_Imprimir_Ticket">Imprimir Ticket</button>
+                <button id="Boton_Continuar">Continuar</button>
+            </div>
+        </footer>
+    </div>
+    <script>
+        function formatearFecha(fecha) {
+            const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+            return fecha.toLocaleDateString('es-ES', opciones);
+        }
+        function formatearHora(fecha) {
+            const opciones = { hour: '2-digit', minute: '2-digit' };
+            return fecha.toLocaleTimeString('es-ES', opciones);
+        }
+        function generarKID() {
+            const num = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return 'K' + num;
+        }
+        function cargarTicket() {
+            console.log('=== DEBUG CARGAR TICKET ===');
+            
+            const ahora = new Date();
+            
+            // NUEVA LÓGICA: Verificar parámetros de URL para CheckoutPro
+            const urlParams = new URLSearchParams(window.location.search);
+            const external_reference = urlParams.get('ref');
+            const source = urlParams.get('source');
+            const payment_id = urlParams.get('payment_id');
+            const collection_status = urlParams.get('collection_status');
+            const status = urlParams.get('status');
+            
+            console.log('📍 Parámetros URL:', { external_reference, source, payment_id, collection_status, status });
+            
+            // Obtener datos del localStorage con debugging
+            let items = JSON.parse(localStorage.getItem('ticket_items') || '[]');
+            let totalString = localStorage.getItem('ticket_total') || '0';
+            let numeroOrden = localStorage.getItem('numero_orden') || generarKID();
+            let metodoPago = localStorage.getItem('metodo_pago') || 'QR Mercado Pago';
+            
+            console.log('📋 Datos iniciales del localStorage:');
+            console.log('- ticket_items:', items);
+            console.log('- ticket_total (string):', totalString);
+            console.log('- numero_orden:', numeroOrden);
+            console.log('- metodo_pago:', metodoPago);
+            
+            // Si viene desde CheckoutPro y no tenemos datos, intentar obtener del archivo de estado
+            if (source === 'checkoutpro' && external_reference && (items.length === 0 || !numeroOrden)) {
+                console.log('🔄 CheckoutPro detectado, usando datos ya configurados o fallback...');
+                
+                // Si no tenemos datos, usar fallback básico pero continuar
+                if (items.length === 0) {
+                    const carritoBackup = JSON.parse(localStorage.getItem('checkout_backup_carrito') || '[]');
+                    if (carritoBackup.length > 0) {
+                        items = carritoBackup;
+                        localStorage.setItem('ticket_items', JSON.stringify(carritoBackup));
+                        console.log('🔄 Usando carrito de backup:', carritoBackup);
+                    }
+                }
+            }
+            
+            // Continuar con el renderizado normal
+            continuarCargarTicket();
+        } // Cerrar función cargarTicket
+        
+        function continuarCargarTicket() {
+            
+            function intentarObtenerArchivoEstado() {
+                console.log('📄 Intentando obtener archivo de estado...');
+                
+                // Intentar obtener datos del archivo de estado del webhook
+                fetch(`/Totem_Murialdo/backend/ordenes_status/orden_${external_reference}.json`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Archivo de estado no encontrado');
+                    })
+                    .then(data => {
+                        console.log('📄 Datos obtenidos del archivo de estado:', data);
+                        
+                        if (data.ticket_data) {
+                            // Usar datos del webhook
+                            numeroOrden = data.ticket_data.numero_orden;
+                            metodoPago = data.ticket_data.metodo_pago;
+                            items = data.ticket_data.ticket_items;
+                            totalString = data.ticket_data.ticket_total;
+                            
+                            console.log('✅ Datos actualizados desde archivo de estado');
+                        } else if (data.carrito) {
+                            // Usar carrito del archivo de estado
+                            items = data.carrito;
+                            numeroOrden = data.numero_pedido || `CP-${external_reference.substr(-6)}`;
+                            metodoPago = 'CheckoutPro Mercado Pago';
+                            
+                            // Calcular total del carrito
+                            let totalCalculado = 0;
+                            items.forEach(item => {
+                                totalCalculado += (item.precio_unitario * item.cantidad);
+                                if (item.personalizaciones) {
+                                    item.personalizaciones.forEach(pers => {
+                                        totalCalculado += (pers.precio_extra || 0) * item.cantidad;
+                                    });
+                                }
+                            });
+                            totalString = totalCalculado.toString();
+                            
+                            console.log('✅ Datos reconstruidos desde carrito del webhook');
+                        }
+                        
+                        // Actualizar localStorage con los nuevos datos
+                        localStorage.setItem('ticket_items', JSON.stringify(items));
+                        localStorage.setItem('ticket_total', totalString);
+                        localStorage.setItem('numero_orden', numeroOrden);
+                        localStorage.setItem('metodo_pago', metodoPago);
+                        
+                        // Continuar con el renderizado
+                        continuarCargarTicket();
+                    })
+                    .catch(error => {
+                        console.warn('⚠️ No se pudo obtener datos del archivo de estado:', error);
+                        
+                        // FALLBACK: Si tenemos carrito backup y payment_id, crear pedido directamente
+                        if (payment_id && (collection_status === 'approved' || status === 'approved')) {
+                            console.log('🔄 Usando fallback: crear pedido directamente con carrito backup');
+                            
+                            const carritoBackup = JSON.parse(localStorage.getItem('checkout_backup_carrito') || '[]');
+                            if (carritoBackup.length > 0) {
+                                crearPedidoDirectamente(carritoBackup, external_reference);
+                                return;
+                            }
+                        }
+                        
+                        // Continuar con datos actuales (pueden ser parciales)
+                        continuarCargarTicket();
+                    });
+            }
+            
+            // Función para crear pedido directamente cuando el webhook falló
+            function crearPedidoDirectamente(carrito, external_ref) {
+                console.log('📝 Creando pedido directamente en BD...');
+                
+                fetch('/Totem_Murialdo/backend/api/guardar_pedido.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        carrito: carrito, 
+                        metodo_pago: 'VIRTUAL',
+                        estado: 'PREPARACION',
+                        origen: 'kiosco'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('✅ Pedido creado directamente:', data.numero_pedido);
+                        
+                        // Calcular total
+                        let totalCalculado = 0;
+                        carrito.forEach(item => {
+                            totalCalculado += (item.precio_unitario * item.cantidad);
+                            if (item.personalizaciones) {
+                                item.personalizaciones.forEach(pers => {
+                                    totalCalculado += (pers.precio_extra || 0) * item.cantidad;
+                                });
+                            }
+                        });
+                        
+                        // Actualizar localStorage con los datos correctos
+                        localStorage.setItem('numero_orden', data.numero_pedido);
+                        localStorage.setItem('metodo_pago', 'CheckoutPro Mercado Pago');
+                        localStorage.setItem('ticket_items', JSON.stringify(carrito));
+                        localStorage.setItem('ticket_total', totalCalculado.toString());
+                        
+                        console.log('📋 LocalStorage actualizado con datos del pedido directo');
+                        
+                        // Continuar con el renderizado
+                        continuarCargarTicket();
+                    } else {
+                        console.error('❌ Error al crear pedido directamente:', data.error);
+                        continuarCargarTicket();
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error de conexión al crear pedido directamente:', error);
+                    continuarCargarTicket();
+                });
+            } // Cerrar función crearPedidoDirectamente
+            
+            } // Cerrar función intentarObtenerArchivoEstado
+            
+            // Continuar con el flujo normal
+            continuarCargarTicket();
+         // Cerrar función cargarTicket
+
+        function imprimirTicket() {
+            // Recopilar los datos del ticket desde la pantalla
+            const numeroOrden = document.getElementById('numero-orden').textContent;
+            const fecha = document.getElementById('fecha').textContent;
+            const hora = document.getElementById('hora').textContent;
+
+            // Buscar el método de pago de forma segura
+            let metodoPago = '';
+            document.querySelectorAll('.info-label').forEach((el) => {
+                if (el.textContent.includes('Método de pago')) {
+                    metodoPago = el.nextElementSibling.textContent;
+                }
+            });
+
+            // Obtener el total pagado tal como aparece en pantalla
+            const totalPagado = document.getElementById('total-pagado').textContent;
+
+            // Recopilar los items del pedido
+            const items = [];
+            document.querySelectorAll('#order-items .item').forEach(item => {
+                const nombre = item.querySelector('.item-name').textContent;
+                const cantidad = item.querySelector('.item-quantity').textContent.replace('x', '');
+                const precio = item.querySelector('.item-price').textContent;
+                items.push({ nombre, cantidad, precio });
+            });
+
+            // Enviar los datos al archivo PHP
+            fetch('../../backend/api/print_ticket.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    numeroOrden,
+                    fecha,
+                    hora,
+                    metodoPago,
+                    totalPagado,
+                    items
+                })
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Respuesta de impresión:', data);
+                })
+                .catch(error => {
+                    console.error('Error al imprimir el ticket:', error);
+                });
+        }
+
+        // Función para imprimir con QZ Tray (sin cartel usando llaves demo)
+        function printWithQZTray(ticketContent) {
+            return new Promise((resolve, reject) => {
+                if (typeof qz === 'undefined') {
+                    reject(new Error('QZ Tray no está disponible'));
+                    return;
+                }
+
+                console.log('🔧 Iniciando impresión directa con QZ Tray...');
+
+                // Verificar si ya está conectado o conectar (IGUAL QUE EN TEST)
+                const printPromise = qz.websocket.isActive() 
+                    ? Promise.resolve()
+                    : connectToQZTray();
+
+                printPromise
+                    .then(() => {
+                        console.log('✅ Usando conexión existente o nueva para impresión');
+                        return qz.printers.find();
+                    })
+                    .then((printers) => {
+                        if (printers.length === 0) {
+                            throw new Error('No se encontraron impresoras disponibles');
+                        }
+
+                        console.log('🖨️ Impresoras encontradas:', printers.join(', '));
+                        
+                        // Buscar la impresora térmica EPSON TM-T88V que detectaste
+                        let selectedPrinter = printers[0]; // Por defecto la primera
+                        
+                        const epsonThermal = printers.find(p => 
+                            p.toLowerCase().includes('epson tm-t88v') ||
+                            p.toLowerCase().includes('tm-t88v')
+                        );
+                        
+                        if (epsonThermal) {
+                            selectedPrinter = epsonThermal;
+                            console.log('🎯 Usando impresora térmica EPSON:', selectedPrinter);
+                        }
+                        
+                        // USAR LA MISMA CONFIGURACIÓN QUE FUNCIONA EN TEST
+                        const config = qz.configs.create(selectedPrinter);
+                        
+                        const data = [{
+                            type: 'raw',
+                            format: 'plain',
+                            data: ticketContent
+                        }];
+
+                        console.log('📄 Enviando ticket a la impresora:', selectedPrinter);
+                        return qz.print(config, data);
+                    })
+                    .then(() => {
+                        console.log('✅ Ticket impreso exitosamente SIN CARTEL');
+                        resolve();
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error al imprimir:', error);
+                        reject(error);
+                    });
+            });
+        }
+
+        // Función para imprimir ticket usando QZ Tray con configuración mejorada
+        function imprimirTicketQZ() {
+            // Recopilar datos del ticket desde la pantalla
+            const numeroOrden = document.getElementById('numero-orden').textContent;
+            const fecha = document.getElementById('fecha').textContent;
+            const hora = document.getElementById('hora').textContent;
+            const totalPagado = document.getElementById('total-pagado').textContent;
+
+            // Buscar el método de pago
+            let metodoPago = 'QR Mercado Pago';
+            document.querySelectorAll('.info-label').forEach((el) => {
+                if (el.textContent.includes('Método de pago')) {
+                    metodoPago = el.nextElementSibling.textContent;
+                }
+            });
+
+            // Recopilar items del pedido
+            const items = [];
+            document.querySelectorAll('#order-items .item').forEach(item => {
+                const nombre = item.querySelector('.item-name').textContent.trim();
+                const cantidad = item.querySelector('.item-quantity').textContent.replace('x', '').trim();
+                const precio = item.querySelector('.item-price').textContent.trim();
+                items.push({ nombre, cantidad, precio });
+            });
+
+            // Crear el contenido del ticket con formato térmico
+            const ticketData = [
+                '\x1B@', // Inicializar impresora
+                '\x1B!\x38', // Texto grande
+                'TOTEM MURIALDO\n',
+                '\x1B!\x00', // Texto normal
+                '===============================\n',
+                `Ticket No: ${numeroOrden}\n`,
+                `Fecha: ${fecha}\n`,
+                `Hora: ${hora}\n`,
+                '===============================\n'
+            ];
+
+            // Agregar items del pedido
+            items.forEach(item => {
+                // Limpiar el nombre del item (remover chips de personalización para la impresión)
+                let nombreLimpio = item.nombre;
+                // Remover contenido entre spans (personalizaciones)
+                nombreLimpio = nombreLimpio.replace(/<span[^>]*>.*?<\/span>/gi, '');
+                
+                // En lugar de cortar, dividir en líneas si es muy largo
+                const maxCaracteresPorLinea = 31; // Ancho típico de impresora térmica
+                if (nombreLimpio.length > maxCaracteresPorLinea) {
+                    // Dividir el nombre en palabras y reorganizar en líneas
+                    const palabras = nombreLimpio.split(' ');
+                    let lineaActual = '';
+                    let lineasNombre = [];
+                    
+                    palabras.forEach(palabra => {
+                        if ((lineaActual + palabra).length <= maxCaracteresPorLinea) {
+                            lineaActual += (lineaActual ? ' ' : '') + palabra;
+                        } else {
+                            if (lineaActual) {
+                                lineasNombre.push(lineaActual);
+                                lineaActual = palabra;
+                            } else {
+                                // Si una sola palabra es muy larga, cortarla
+                                lineasNombre.push(palabra.substring(0, maxCaracteresPorLinea));
+                                lineaActual = '';
+                            }
+                        }
+                    });
+                    
+                    if (lineaActual) {
+                        lineasNombre.push(lineaActual);
+                    }
+                    
+                    // Agregar cada línea del nombre
+                    lineasNombre.forEach(linea => {
+                        ticketData.push(`${linea}\n`);
+                    });
+                } else {
+                    ticketData.push(`${nombreLimpio}\n`);
+                }
+                
+                ticketData.push(`${item.cantidad} x ${item.precio}\n`);
+            });
+
+            ticketData.push('===============================\n');
+            ticketData.push(`TOTAL: ${totalPagado}\n`);
+            ticketData.push(`PAGO: ${metodoPago}\n`);
+            ticketData.push('===============================\n');
+            ticketData.push('GRACIAS POR SU COMPRA\n');
+            ticketData.push('\n\n\n');
+            ticketData.push('\x1DVA0'); // Corte de papel
+
+            // Usar la función de impresión con QZ Tray (sin cartel)
+            printWithQZTray(ticketData.join(''))
+                .then(() => {
+                    console.log('🎉 Ticket enviado a la impresora exitosamente');
+                    // Mostrar mensaje de éxito al usuario
+                    const botonImprimir = document.getElementById('Boton_Imprimir_Ticket');
+                    const textoOriginal = botonImprimir.textContent;
+                    botonImprimir.textContent = '✓ Impreso';
+                    botonImprimir.style.backgroundColor = '#28a745';
+                    
+                    // Restaurar el botón después de 3 segundos
+                    setTimeout(() => {
+                        botonImprimir.textContent = textoOriginal;
+                        botonImprimir.style.backgroundColor = '';
+                    }, 3000);
+                })
+                .catch(err => {
+                    console.error('❌ Error de impresión:', err);
+                    // Mostrar mensaje de error al usuario
+                    const botonImprimir = document.getElementById('Boton_Imprimir_Ticket');
+                    const textoOriginal = botonImprimir.textContent;
+                    botonImprimir.textContent = '✗ Error';
+                    botonImprimir.style.backgroundColor = '#dc3545';
+                    
+                    // Mostrar detalles del error
+                    alert('Error al imprimir: ' + err.message + '\n\nVerifica que QZ Tray esté ejecutándose y que haya una impresora conectada.');
+                    
+                    // Restaurar el botón después de 3 segundos
+                    setTimeout(() => {
+                        botonImprimir.textContent = textoOriginal;
+                        botonImprimir.style.backgroundColor = '';
+                    }, 3000);
+                });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Configurar QZ Tray al cargar la página (IGUAL QUE EN TEST QUE FUNCIONA)
+            console.log('🔧 Inicializando QZ Tray...');
+            console.log('🌐 Entorno: ' + (window.location.hostname === 'ilm2025.webhop.net' ? 'Producción' : 'Local'));
+            
+            // Cargar los datos del ticket primero
+            cargarTicket();
+            
+            // Configurar QZ Tray después de cargar la página (como en test)
+            setTimeout(() => {
+                if (typeof qz !== 'undefined' && typeof configureQZTray === 'function') {
+                    try {
+                        if (configureQZTray()) {
+                            console.log('✅ QZ Tray configurado con llaves demo - Cartel eliminado');
+                        } else {
+                            console.error('❌ Error configurando QZ Tray');
+                        }
+                    } catch (error) {
+                        console.error('❌ Excepción al configurar QZ Tray:', error);
+                    }
+                } else {
+                    console.error('❌ QZ Tray o su configuración no están disponibles');
+                }
+            }, 500);
+        });
+        
+        // Botón Continuar (reemplaza al botón Nueva Compra)
+        document.getElementById('Boton_Continuar').addEventListener('click', function () {
+            window.location.href = 'pantallafinal.html';
+        });
+
+        // Botón Imprimir Ticket (sin redirección)
+        document.getElementById('Boton_Imprimir_Ticket').addEventListener('click', function () {
+            imprimirTicketQZ();
+            // No hay redirección automática, el usuario decide cuándo continuar
+        });
+    </script>
+</body>
+
+</html>

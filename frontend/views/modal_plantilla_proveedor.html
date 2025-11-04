@@ -1,0 +1,29 @@
+<!-- Modal Plantilla Proveedor -->
+<div id="modal-plantilla-proveedor" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width: 480px;">
+        <button class="modal-close" onclick="document.getElementById('modal-plantilla-proveedor').style.display='none'">&times;</button>
+        <h2 style="margin-bottom: 12px;">Crear Plantilla de Mensaje</h2>
+        <div id="plantilla-instrucciones-modal" style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; padding: 14px; margin-bottom: 18px; font-size: 15px; display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 1.5em;">💡</span>
+            <div>
+                <strong>¿Cómo usar plantillas de mensaje para pedidos a proveedores?</strong><br>
+                Puedes crear plantillas personalizadas para los mensajes de pedido. Utiliza los siguientes marcadores dinámicos en el texto:<br>
+                <ul style="margin: 8px 0 0 18px; padding: 0;">
+                    <li><b>[CONTACTO]</b>: será reemplazado automáticamente por el nombre del contacto del proveedor.</li>
+                    <li><b>[PRODUCTOS]</b>: será reemplazado por la lista de productos solicitados.</li>
+                </ul>
+                Ejemplo: <span style="font-family:monospace; background:#ffeeba; padding:2px 6px; border-radius:4px;">Hola [CONTACTO], necesito reponer: [PRODUCTOS]</span>
+            </div>
+        </div>
+        <form id="form-plantilla-proveedor" autocomplete="off">
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label for="plantilla-mensaje" style="font-weight: 500;">Mensaje de la plantilla</label>
+                <textarea id="plantilla-mensaje" name="plantilla_mensaje" rows="4" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;resize:vertical;" placeholder="Ej: Hola [CONTACTO], necesito reponer: [PRODUCTOS]"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-light" onclick="document.getElementById('modal-plantilla-proveedor').style.display='none'">Cancelar</button>
+                <button type="submit" class="btn-green">Guardar Plantilla</button>
+            </div>
+        </form>
+    </div>
+</div>

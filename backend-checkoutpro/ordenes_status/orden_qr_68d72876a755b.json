@@ -1,0 +1,24 @@
+{
+    "status": "approved",
+    "external_reference": "qr_68d72876a755b",
+    "order_status": "paid",
+    "fecha_pago": "2025-09-26 20:57:50",
+    "verified_online": true,
+    "endpoint_used": 1,
+    "ticket_data": {
+        "numero_orden": "QR-6a755b",
+        "metodo_pago": "QR_VIRTUAL",
+        "ticket_items": [
+            {
+                "id_producto": 111,
+                "nombre": "Medialuna",
+                "cantidad": 1,
+                "precio_unitario": "1100.00",
+                "es_personalizable": 1,
+                "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/1.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "1,100.00"
+    }
+}

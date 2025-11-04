@@ -1,0 +1,24 @@
+{
+    "status": "approved",
+    "external_reference": "qr_68d71bf6ec6c1",
+    "order_status": "paid",
+    "fecha_pago": "2025-09-26 20:04:33",
+    "verified_online": true,
+    "endpoint_used": 1,
+    "ticket_data": {
+        "numero_orden": "QR-6ec6c1",
+        "metodo_pago": "QR_VIRTUAL",
+        "ticket_items": [
+            {
+                "id_producto": 19,
+                "nombre": "Baggio Multifruta 1L",
+                "cantidad": 1,
+                "precio_unitario": 2400,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Baggio_Multifruta_1L.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "2,400.00"
+    }
+}

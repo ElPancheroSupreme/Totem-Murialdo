@@ -1,0 +1,62 @@
+{
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 86,
+            "nombre": "Mogul Tubitos Tutti Frutti",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/4.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758927088457_8ry37lz4w",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T22:51:28.458Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 19:53:20",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 19:53:34",
+    "webhook_id": "127676464096",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-141",
+    "id_pedido": "214",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 1050,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-141",
+        "metodo_pago": "CheckoutPro Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 1,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 86,
+                "nombre": "Mogul Tubitos Tutti Frutti",
+                "cantidad": 1,
+                "precio_unitario": 900,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/4.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "1,050.00"
+    }
+}

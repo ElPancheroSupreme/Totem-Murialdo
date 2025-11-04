@@ -1,0 +1,18 @@
+{
+    "carrito": [
+        {
+            "id_producto": 21,
+            "nombre": "Agua Villavicencio 500ml",
+            "cantidad": 1,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Agua_Villavicencio_500ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1760052783505_d2px0oc90",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-10-09T23:33:03.505Z",
+    "estado": "pendiente",
+    "saved_at": "2025-10-09 20:35:59"
+}

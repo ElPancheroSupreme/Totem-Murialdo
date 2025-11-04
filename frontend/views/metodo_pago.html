@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/Iconos/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/Iconos/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/Iconos/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/Iconos/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/android-chrome-512x512.png">
+    <title>Metodo de Pago</title>
+    <link rel="stylesheet" href="../assets/style/metodopago.css">
+</head>
+
+<body>
+    <main>
+    <div class="Logo">
+        <img src="../assets/images/Iconos/Logo.png" alt="">
+    </div>
+    <div class="Pregunta">
+        <p>¿Cómo vas a pagar?</p>
+    </div>
+    <div class="Contenedor_Botones">
+        <a href="Ticket.html" id="btn-efectivo">
+            <div class="Boton">
+                <img src="../assets/images/Iconos/Icono_Efectivo.png" alt="">
+                <p>Efectivo</p>
+            </div>
+        </a>
+        <a href="PaginaQR.html" id="btn-billetera-virtual">
+            <div class="Boton">
+                <img src="../assets/images/Iconos/Icono_Billetera.png" alt="">
+                <p>Mercado Pago</p>
+            </div>
+        </a>
+    </div>
+    <div id="fuera-minimo-overlay" style="display:none;"></div>
+    <footer>
+        <div class="Footer_Contenedor_Botones">
+            <button id="Boton_Atras">Atrás</button>
+        </div>
+    </footer>
+    <script>
+        // --- Detección de dispositivo móvil ---
+        function esDispositivoMovil() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Logging detallado de la resolución
+            console.log('=== DETECCIÓN DE RESOLUCIÓN ===');
+            console.log('screen.width:', screen.width);
+            console.log('screen.height:', screen.height);
+            console.log('screen.availWidth:', screen.availWidth);
+            console.log('screen.availHeight:', screen.availHeight);
+            console.log('window.innerWidth:', window.innerWidth);
+            console.log('window.innerHeight:', window.innerHeight);
+            console.log('window.outerWidth:', window.outerWidth);
+            console.log('window.outerHeight:', window.outerHeight);
+            console.log('devicePixelRatio:', window.devicePixelRatio);
+            console.log('userAgent:', userAgent);
+            
+            // Detectar móviles por user agent
+            const esMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+            console.log('¿Es móvil por user agent?:', esMobile);
+            
+            // Detectar por características de pantalla táctil y tamaño
+            const esPantallaTactil = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const esPantallaChica = window.innerWidth <= 768;
+            console.log('¿Es pantalla táctil?:', esPantallaTactil);
+            console.log('¿Es pantalla chica?:', esPantallaChica);
+            
+            const resultado = esMobile || (esPantallaTactil && esPantallaChica);
+            console.log('Resultado final esDispositivoMovil():', resultado);
+            
+            return resultado;
+        }
+
+        // --- Overlay de mínimo Mercado Pago ---
+        function mostrarOverlayMinimo(msg) {
+            const overlay = document.getElementById('fuera-minimo-overlay');
+            overlay.style.display = 'flex';
+            overlay.style.position = 'fixed';
+            overlay.style.top = 0;
+            overlay.style.left = 0;
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.background = 'rgba(0,0,0,0.85)';
+            overlay.style.zIndex = 9999;
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.innerHTML = `<div style='background:#fff;padding:32px 48px;border-radius:18px;box-shadow:0 4px 32px #0008;text-align:center;max-width:90vw;'>
+      <div style='font-size:2.2rem;margin-bottom:18px;'>💳</div>
+      <div>El monto mínimo para pagar con Mercado Pago es:</div>
+      <div style='font-size:2.2rem;font-weight:bold;margin:10px 0;' id='minimo-mp-overlay-valor'></div>
+      <div style='font-size:1.1rem;margin-top:10px;'>${msg || 'Por favor, agregue más productos para continuar.'}</div>
+      <button id="btn-volver-minimo" style='margin-top:18px;font-size:1.2rem;padding:8px 32px;border-radius:8px;border:none;background:#facd15;color:#222;cursor:pointer;'>Volver</button>
+    </div>`;
+            document.body.style.pointerEvents = 'none';
+            overlay.style.pointerEvents = 'auto';
+            setTimeout(() => {
+                const btnVolver = document.getElementById('btn-volver-minimo');
+                if (btnVolver) {
+                    btnVolver.onclick = function () {
+                        document.body.style.pointerEvents = '';
+                        // Redirección dinámica según punto de venta
+                        const puntoVentaNombre = localStorage.getItem('punto_venta_nombre');
+                        if (puntoVentaNombre && puntoVentaNombre.toLowerCase() === 'buffet') {
+                            window.location.href = 'buffet.html';
+                        } else {
+                            window.location.href = 'kiosco_dinamico.html';
+                        }
+                    };
+                }
+            }, 50);
+        }
+        function ocultarOverlayMinimo() {
+            const overlay = document.getElementById('fuera-minimo-overlay');
+            overlay.style.display = 'none';
+            document.body.style.pointerEvents = '';
+        }
+        // --- Lógica de métodos de pago habilitados ---
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Agregar event listener para el botón del footer
+            const botonAtras = document.getElementById('Boton_Atras');
+            
+            // Botón Atrás - regresa al carrito sin limpiar
+            if (botonAtras) {
+                botonAtras.addEventListener('click', function() {
+                    window.location.href = 'carrito.html';
+                });
+            }
+
+            // Ocultar botones según config
+            let metodos = { efectivo: true, qr: true };
+            try {
+                const res = await fetch('/Totem_Murialdo/backend/admin/api/configuracion_horarios.php');
+                const data = await res.json();
+                if (data && data.success && data.config && data.config.metodos_pago) {
+                    metodos = data.config.metodos_pago;
+                }
+            } catch (e) { }
+            // Efectivo
+            const btnEfectivo = document.getElementById('btn-efectivo');
+            if (!metodos.efectivo && btnEfectivo) btnEfectivo.style.display = 'none';
+            // QR
+            const btnVirtual = document.getElementById('btn-billetera-virtual');
+            if (!metodos.qr && btnVirtual) btnVirtual.style.display = 'none';
+
+            // Lógica de click efectivo
+            if (btnEfectivo && metodos.efectivo) {
+                btnEfectivo.addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                    // Ajustar personalizaciones para que sean objetos {nombre_opcion, precio_extra}
+                    carrito.forEach(item => {
+                        if (Array.isArray(item.personalizaciones)) {
+                            item.personalizaciones = item.personalizaciones.map(pers => {
+                                if (typeof pers === 'string') {
+                                    return { nombre_opcion: pers, precio_extra: 0 };
+                                }
+                                return pers;
+                            });
+                        }
+                    });
+                    const total = parseInt(localStorage.getItem('carrito_total') || '0');
+                    const metodo_pago = 'EFECTIVO';
+                    const id_punto_venta = parseInt(localStorage.getItem('punto_venta_id') || '2'); // Buffet=1, Kiosco=2
+                    try {
+                        const res = await fetch('/Totem_Murialdo/backend/api/guardar_pedido.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ carrito, metodo_pago, id_punto_venta })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            localStorage.setItem('numero_orden', data.numero_pedido);
+                            localStorage.setItem('metodo_pago', data.metodo_pago || metodo_pago);
+                            localStorage.setItem('ticket_items', JSON.stringify(carrito));
+                            localStorage.setItem('ticket_total', total);
+                            window.location.href = 'Ticket.html';
+                        } else {
+                            alert('Error al guardar el pedido: ' + (data.error || 'Desconocido'));
+                        }
+                    } catch (e) {
+                        alert('Error de conexión al guardar el pedido.');
+                    }
+                });
+            }
+            // Lógica de click QR
+            if (btnVirtual && metodos.qr) {
+                btnVirtual.addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    const total = parseFloat(localStorage.getItem('carrito_total') || '0');
+                    // Obtener monto mínimo desde backend
+                    let montoMinimo = 1;
+                    try {
+                        const res = await fetch('/Totem_Murialdo/backend/admin/api/configuracion_horarios.php');
+                        const data = await res.json();
+                        if (data && data.success && data.config && typeof data.config.monto_minimo_mp !== 'undefined') {
+                            montoMinimo = parseFloat(data.config.monto_minimo_mp);
+                        }
+                    } catch (e) { }
+                    if (total < montoMinimo) {
+                        mostrarOverlayMinimo('El total de tu pedido es menor al mínimo permitido para Mercado Pago.');
+                        document.getElementById('minimo-mp-overlay-valor').textContent = `$${montoMinimo.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                        return;
+                    }
+                    ocultarOverlayMinimo();
+                    
+                    // Detectar dispositivo móvil y redirigir apropiadamente
+                    console.log(`📱 Resolución detectada: ${screen.width}x${screen.height}`);
+                    if (esDispositivoMovil()) {
+                        console.log('Dispositivo móvil detectado - redirigiendo a CheckoutPro');
+                        window.location.href = '/Totem_Murialdo/frontend-checkoutpro/views/checkoutpro.html';
+                    } else {
+                        console.log('Dispositivo de escritorio/tablet detectado - redirigiendo a QR');
+                        window.location.href = 'PaginaQR.html';
+                    }
+                });
+            }
+        });
+    </script>
+    <script src="../assets/js/inactivity-detector.js"></script>
+    </main>
+</body>
+
+</html>

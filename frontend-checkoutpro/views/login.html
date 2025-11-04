@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Buffet Murialdino</title>
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/style/Config.css">
+    <link rel="stylesheet" href="../assets/style/login.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <img src="../assets/images/Iconos/Logo.png" alt="Logo Buffet Murialdino" class="login-logo"
+                    style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 1rem; display: block; margin-left: auto; margin-right: auto;" />
+                <h1>Buffet Murialdino</h1>
+            </div>
+
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" id="usuario" name="usuario" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="login-btn">Iniciar Sesión</button>
+                <div id="error-message" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorMessage = document.getElementById('error-message');
+            const loginBtn = document.querySelector('.login-btn');
+
+            try {
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Iniciando sesión...';
+                errorMessage.style.display = 'none';
+
+                const formData = new FormData(e.target);
+                const usuario = formData.get('usuario');
+                const password = formData.get('password');
+
+                const response = await fetch('/Totem_Murialdo/backend-checkoutpro/api/login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ usuario, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/Totem_Murialdo/frontend/views/ConfigDash.html';
+                } else {
+                    throw new Error(data.error || 'Error al iniciar sesión');
+                }
+
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Iniciar Sesión';
+            }
+        });
+    </script>
+</body>
+
+</html>

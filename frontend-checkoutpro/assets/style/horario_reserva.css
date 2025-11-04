@@ -1,0 +1,111 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    width: 100dvw;
+    height: 100dvh;
+    background-color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5dvh;
+    font-family: sans-serif;
+
+}
+img{
+    margin-top: 4dvh;
+    width: auto;
+    height: 17dvh;
+    object-fit: contain;
+}
+h1{
+    font-weight: bold;
+    color: #000;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.68dvh; /* Ajusta este valor según lo que veas en pantalla */
+}
+
+.Contenedor_Horarios{
+    width: 90%;
+    height: 60dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5dvh;
+    overflow-y: auto;
+
+}
+.Horario{
+    width: 100%;
+    min-height: 6.6dvh; /* Cambiado de height a min-height para evitar shrinking */
+    height: 6.6dvh; /* Mantener height fijo también */
+    flex-shrink: 0; /* Evitar que se compriman */
+    background-color: #fff;
+    border-radius: 1dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.3dvh; /* Ajusta este valor según lo que veas en pantalla */
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.Horario:hover {
+    background-color: #f0f8ff;
+    transform: translateY(-2px);
+}
+
+.Horario.selected {
+    background-color: #007bff;
+    color: white;
+}
+
+.Horario.seleccionado {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.02);
+}
+
+.loader {
+    width: 100%;
+    height: 6.6dvh;
+    background-color: #f8f9fa;
+    border-radius: 1dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5dvh;
+    color: #666;
+    font-style: italic;
+}
+
+.no-horarios, .error {
+    width: 100%;
+    min-height: 6.6dvh;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 1dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5dvh;
+    color: #856404;
+    text-align: center;
+    padding: 1dvh;
+}
+
+.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}

@@ -1,0 +1,27 @@
+{
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 2,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 83,
+            "nombre": "Mogul Tiburones",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/1.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758927512927_2g5la8yzz",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T22:58:32.928Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 20:00:25"
+}

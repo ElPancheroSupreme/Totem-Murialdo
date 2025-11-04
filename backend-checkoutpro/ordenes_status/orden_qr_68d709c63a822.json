@@ -1,0 +1,63 @@
+{
+    "numero_orden": "K4535",
+    "carrito": [
+        {
+            "id_producto": 19,
+            "nombre": "Baggio Multifruta 1L",
+            "cantidad": 1,
+            "precio_unitario": 2400,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Baggio_Multifruta_1L.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 2550,
+    "fecha": "2025-09-26",
+    "hora": "18:46:46",
+    "origen": "kiosco",
+    "external_reference": "qr_68d709c63a822",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 18:46:59",
+    "webhook_id": "127106011691",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-125",
+    "id_pedido": "198",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 2550,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-125",
+        "metodo_pago": "QR Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 19,
+                "nombre": "Baggio Multifruta 1L",
+                "cantidad": 1,
+                "precio_unitario": 2400,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Baggio_Multifruta_1L.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 1,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "2,550.00"
+    }
+}

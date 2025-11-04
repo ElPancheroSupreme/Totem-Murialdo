@@ -1,0 +1,18 @@
+{
+    "carrito": [
+        {
+            "id_producto": 17,
+            "nombre": "Cepita Multifruta 200ml",
+            "cantidad": 4,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Cepita_Multifruta_200ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1759248527892_8uxo9ldak",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-30T16:08:47.892Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-30 13:10:40"
+}

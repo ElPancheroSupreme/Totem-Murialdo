@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ticket de Pago - Mercado Pago</title>
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/Iconos/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/Iconos/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/Iconos/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/Iconos/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/Iconos/android-chrome-512x512.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/style/ticket.css">
+    <script src="../test/qz-tray.js"></script>
+    <script src="../test/qz-config-final.js"></script>
+    <!-- Librería para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <script>
+        // Función helper para redirección dinámica según punto de venta
+        function volverAlMenu() {
+            const puntoVentaNombre = localStorage.getItem('punto_venta_nombre');
+            if (puntoVentaNombre && puntoVentaNombre.toLowerCase() === 'buffet') {
+                window.location.href = 'buffet.html';
+            } else {
+                window.location.href = 'kiosco_dinamico.html';
+            }
+        }
+    </script>
+    <div class="ticket-vertical-main">
+        <div class="ticket-vertical-content">
+            <div class="ticket-container">
+                <div class="ticket-header">
+                    <div class="ticket-title">¡Pago Exitoso!</div>
+                    <div class="ticket-numero-orden" id="numero-orden">K0000</div>
+                    <div class="ticket-subtitle">Retirá tu pedido con este número</div>
+                </div>
+                <div class="ticket-body">
+                    <div class="ticket-info">
+                        <div class="info-row">
+                            <span class="info-label">Fecha:</span>
+                            <span class="info-value" id="fecha">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Hora:</span>
+                            <span class="info-value" id="hora">-</span>
+                        </div>
+                        <div class="info-row" id="reserva-info" style="display: none;">
+                            <span class="info-label">📅 Reservado para:</span>
+                            <span class="info-value" id="hora-reserva" style="font-weight: bold; color: #007bff;">-</span>
+                        </div>
+                        <div class="info-row" style="display: none;">
+                            <span class="info-value" id="referencia">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Método de pago:</span>
+                            <span class="info-value">QR Mercado Pago</span>
+                        </div>
+                    </div>
+                    <div class="order-items" id="order-items"></div>
+                    <div class="info-row total-row">
+                        <span class="info-label">Total pagado:</span>
+                        <span class="info-value" id="total-pagado">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div class="Footer_Contenedor_Botones">
+                <button id="Boton_Descargar_PDF" >📄 Descargar Comprobante</button>
+                <button id="Boton_Continuar">Continuar</button>
+            </div>
+        </footer>
+    </div>
+    <script>
+        function formatearFecha(fecha) {
+            const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+            return fecha.toLocaleDateString('es-ES', opciones);
+        }
+        function formatearHora(fecha) {
+            const opciones = { hour: '2-digit', minute: '2-digit' };
+            return fecha.toLocaleTimeString('es-ES', opciones);
+        }
+        
+        // === SISTEMA DE RESPALDO (igual que QR) ===
+        async function ejecutarRespaldoGuardarPedido(external_reference) {
+            console.log('🚨 EJECUTANDO RESPALDO - guardar_pedido.php');
+            console.log('🔍 External reference para respaldo:', external_reference);
+            
+            // Obtener carrito del localStorage (datos previos del checkout)
+            const carrito = JSON.parse(localStorage.getItem('carrito') || localStorage.getItem('checkout_backup_carrito') || '[]');
+            const total = localStorage.getItem('carrito_total') || localStorage.getItem('checkout_backup_total') || '0';
+            
+            console.log('🛒 Carrito para respaldo:', JSON.stringify(carrito, null, 2));
+            console.log('💰 Total para respaldo:', total);
+            
+            if (carrito.length === 0) {
+                console.error('❌ RESPALDO FALLIDO: No hay carrito disponible');
+                
+                // Intentar recuperar carrito desde archivo _pre.json usando external_reference
+                if (external_reference) {
+                    console.log('🔄 Intentando recuperar carrito desde archivo _pre...');
+                    try {
+                        const preResponse = await fetch('/Totem_Murialdo/backend-checkoutpro/api/get_datos_completos_pedido.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                external_reference: external_reference,
+                                force_pre_file: true  // Parámetro especial para forzar lectura de _pre
+                            })
+                        });
+                        
+                        const preData = await preResponse.json();
+                        if (preData.success && preData.carrito) {
+                            console.log('✅ Carrito recuperado desde archivo _pre');
+                            carrito = preData.carrito;
+                            total = preData.monto_total || total;
+                        }
+                    } catch (e) {
+                        console.error('❌ No se pudo recuperar carrito desde _pre:', e);
+                    }
+                }
+                
+                if (carrito.length === 0) {
+                    mostrarErrorSinCarrito();
+                    return;
+                }
+            }
+            
+            try {
+                // Obtener datos de reserva desde localStorage
+                const es_reserva = localStorage.getItem('es_reserva') || '0';
+                const horario_seleccionado = JSON.parse(localStorage.getItem('horario_seleccionado') || 'null');
+                
+                // Solo usar id_horario si es_reserva = 1
+                const es_reserva_int = parseInt(es_reserva);
+                const id_horario = (es_reserva_int === 1 && horario_seleccionado) ? horario_seleccionado.id : null;
+                
+                // Llamar a guardar_pedido.php exactamente igual que QR
+                const response = await fetch('/Totem_Murialdo/backend-checkoutpro/api/guardar_pedido.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        carrito: carrito, 
+                        metodo_pago: 'VIRTUAL',     // BD solo acepta VIRTUAL o EFECTIVO
+                        estado: 'PREPARACION',      // BD solo acepta estos estados
+                        es_reserva: es_reserva_int,
+                        id_horario: id_horario
+                    })
+                });
+                
+                const pedidoData = await response.json();
+                console.log('📋 Respuesta de guardar_pedido:', pedidoData);
+                
+                if (pedidoData.success) {
+                    // El backend ya genera el formato correcto K-XXX
+                    const numeroFinal = pedidoData.numero_pedido;
+                    
+                    console.log('✅ RESPALDO EXITOSO - Pedido guardado:', numeroFinal);
+                    console.log('🛒 Items guardados:', carrito.length);
+                    
+                    // Actualizar localStorage con datos del respaldo
+                    localStorage.setItem('numero_orden', numeroFinal);
+                    localStorage.setItem('metodo_pago', 'CheckoutPro Mercado Pago');
+                    localStorage.setItem('ticket_items', JSON.stringify(carrito));
+                    localStorage.setItem('ticket_total', total);
+                    
+                    // Actualizar variables globales para que cargarTicket las use
+                    window.respaldoData = {
+                        numeroOrden: numeroFinal,
+                        items: carrito,
+                        totalString: total,
+                        metodoPago: 'CheckoutPro Mercado Pago'
+                    };
+                    
+                    console.log('✅ Datos de respaldo preparados para el ticket');
+                    
+                } else {
+                    console.error('❌ RESPALDO FALLIDO - Error al guardar:', pedidoData.error);
+                    mostrarErrorRespaldo(pedidoData.error);
+                }
+                
+            } catch (error) {
+                console.error('❌ RESPALDO FALLIDO - Error de conexión:', error);
+                mostrarErrorConexionRespaldo();
+            }
+        }
+        
+        // === FUNCIONES DE ERROR PARA RESPALDO ===
+        function mostrarErrorSinCarrito() {
+            document.querySelector('.ticket-container').innerHTML = `
+                <div style="background: #ffe6e6; border: 2px solid #ff4444; padding: 30px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🛒</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 15px;">
+                        Error: Sin Datos del Carrito
+                    </div>
+                    <div style="font-size: 16px; color: #666; margin-bottom: 25px;">
+                        No se encontraron los productos del pedido.<br>
+                        Por favor contacta al personal del establecimiento.
+                    </div>
+                    <button onclick="volverAlMenu()" 
+                            style="background: #00a650; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; margin-right: 10px;">
+                        Volver al Menú
+                    </button>
+                    <button onclick="location.reload()" 
+                            style="background: #0066cc; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px;">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+        
+        function mostrarErrorRespaldo(error) {
+            document.querySelector('.ticket-container').innerHTML = `
+                <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 30px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 15px;">
+                        Error en Sistema de Respaldo
+                    </div>
+                    <div style="font-size: 16px; color: #666; margin-bottom: 10px;">
+                        El pago se procesó correctamente, pero hubo un problema al registrar el pedido.
+                    </div>
+                    <div style="font-size: 14px; color: #888; margin-bottom: 25px;">
+                        Error: ${error}
+                    </div>
+                    <button onclick="volverAlMenu()" 
+                            style="background: #00a650; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; margin-right: 10px;">
+                        Volver al Menú
+                    </button>
+                    <button onclick="location.reload()" 
+                            style="background: #0066cc; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px;">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+        
+        function mostrarErrorConexionRespaldo() {
+            document.querySelector('.ticket-container').innerHTML = `
+                <div style="background: #e7f3ff; border: 2px solid #0066cc; padding: 30px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🔄</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 15px;">
+                        Problema de Conexión
+                    </div>
+                    <div style="font-size: 16px; color: #666; margin-bottom: 25px;">
+                        El pago se procesó correctamente.<br>
+                        Reintentando conexión con el servidor...
+                    </div>
+                    <button onclick="volverAlMenu()" 
+                            style="background: #00a650; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; margin-right: 10px;">
+                        Volver al Menú
+                    </button>
+                    <button onclick="location.reload()" 
+                            style="background: #0066cc; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px;">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+        
+        async function cargarTicket() {
+            console.log('=== DEBUG CARGAR TICKET ===');
+            
+            const ahora = new Date();
+            
+            // Obtener external_reference de la URL si existe
+            const urlParams = new URLSearchParams(window.location.search);
+            const refFromUrl = urlParams.get('ref');
+            const sourceFromUrl = urlParams.get('source');
+            
+            console.log('🔍 Parámetros URL - ref:', refFromUrl, 'source:', sourceFromUrl);
+            
+            // Si hay external_reference en URL, guardarlo para uso posterior
+            if (refFromUrl) {
+                localStorage.setItem('external_reference', refFromUrl);
+                console.log('📄 External reference guardado desde URL:', refFromUrl);
+            }
+            
+            // Obtener datos del localStorage con debugging
+            let items = JSON.parse(localStorage.getItem('ticket_items') || '[]');
+            let totalString = localStorage.getItem('ticket_total') || '0';
+            let numeroOrden = localStorage.getItem('numero_orden'); // NO generar automáticamente
+            let metodoPago = localStorage.getItem('metodo_pago') || 'QR Mercado Pago';
+            
+            // Verificar si tenemos un número válido (de la base de datos)
+            // CRÍTICO: Si ya tenemos número de orden Y external_reference guardado, NO volver a verificar
+            const externalRefGuardado = localStorage.getItem('external_reference');
+            const yaVerificado = numeroOrden && externalRefGuardado === refFromUrl;
+            
+            if (yaVerificado) {
+                console.log('✅ PEDIDO YA VERIFICADO PREVIAMENTE');
+                console.log('  - Número:', numeroOrden);
+                console.log('  - External Ref:', externalRefGuardado);
+                console.log('  - Usando datos en caché, SIN crear duplicado');
+                // NO hacer nada más, usar datos existentes
+            } else if (!numeroOrden || (refFromUrl && sourceFromUrl === 'checkoutpro' && !yaVerificado)) {
+                // NUEVA LÓGICA: Solo verificar si NO tenemos número o es la PRIMERA vez con este external_reference
+                if (!numeroOrden) {
+                    console.error('❌ CRÍTICO: No se encontró numero_orden en localStorage');
+                } else {
+                    console.warn('🔄 CHECKOUTPRO: Primera verificación para este external_reference');
+                }
+                
+                console.log('🔍 Verificando todos los valores en localStorage:');
+                for (let key in localStorage) {
+                    if (key.includes('numero') || key.includes('orden') || key.includes('pedido')) {
+                        console.log(`  - ${key}: ${localStorage.getItem(key)}`);
+                    }
+                }
+                
+                // Si tenemos external_reference (CheckoutPro), VERIFICAR PRIMERO SI YA EXISTE
+                if (refFromUrl && sourceFromUrl === 'checkoutpro') {
+                    console.warn('🔄 REDIRECCIÓN DIRECTA DE MERCADOPAGO DETECTADA');
+                    console.warn('� VERIFICANDO SI YA EXISTE EL PEDIDO para evitar duplicados...');
+                    
+                    try {
+                        // PASO 1: Verificar si ya existe el pedido con este external_reference
+                        const checkResponse = await fetch('/Totem_Murialdo/backend-checkoutpro/api/verificar_pedido_existente.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ external_reference: refFromUrl })
+                        });
+                        
+                        const checkResult = await checkResponse.json();
+                        console.log('🔍 Resultado verificación:', checkResult);
+                        
+                        if (checkResult.exists && checkResult.pedido) {
+                            // YA EXISTE - usar datos existentes
+                            console.log('✅ PEDIDO YA EXISTE - Cargando datos existentes:', checkResult.pedido.numero_pedido);
+                            
+                            numeroOrden = checkResult.pedido.numero_pedido;
+                            items = checkResult.pedido.items || [];
+                            totalString = checkResult.pedido.monto_total?.toString() || '0';
+                            metodoPago = 'CheckoutPro Mercado Pago';
+                            
+                            console.log('✅ Datos del pedido existente aplicados:');
+                            console.log('  - Número:', numeroOrden);
+                            console.log('  - Items:', items.length, 'productos');
+                            console.log('  - Total:', totalString);
+                            console.log('  - Método:', metodoPago);
+                            
+                            // Guardar en localStorage para futuras cargas
+                            localStorage.setItem('numero_orden', numeroOrden);
+                            localStorage.setItem('ticket_items', JSON.stringify(items));
+                            localStorage.setItem('ticket_total', totalString);
+                            localStorage.setItem('metodo_pago', metodoPago);
+                            
+                        } else {
+                            // NO EXISTE - NECESITAMOS CREAR EL PEDIDO INMEDIATAMENTE
+                            console.log('🆕 PEDIDO NO EXISTE - CREANDO AUTOMÁTICAMENTE...');
+                            console.log('🚨 El webhook no procesó el pago, creando pedido de emergencia');
+                            
+                            try {
+                                await ejecutarRespaldoGuardarPedido(refFromUrl);
+                                
+                                // Usar datos del respaldo si están disponibles
+                                if (window.respaldoData) {
+                                    numeroOrden = window.respaldoData.numeroOrden;
+                                    items = window.respaldoData.items;
+                                    totalString = window.respaldoData.totalString;
+                                    metodoPago = window.respaldoData.metodoPago;
+                                    
+                                    console.log('✅ Pedido de emergencia creado exitosamente:', numeroOrden);
+                                } else {
+                                    throw new Error('Respaldo falló - no hay datos disponibles');
+                                }
+                            } catch (error) {
+                                console.error('❌ ERROR creando pedido de emergencia:', error);
+                                // Mostrar mensaje de error al usuario
+                                mostrarErrorSinCarrito();
+                                return;
+                            }
+                            
+                            // Usar datos del respaldo si están disponibles
+                            if (window.respaldoData) {
+                                console.log('🔄 Usando datos del sistema de respaldo');
+                                numeroOrden = window.respaldoData.numeroOrden;
+                                items = window.respaldoData.items;
+                                totalString = window.respaldoData.totalString;
+                                metodoPago = window.respaldoData.metodoPago;
+                                
+                                console.log('✅ Datos del respaldo aplicados:');
+                                console.log('  - Número:', numeroOrden);
+                                console.log('  - Items:', items.length, 'productos');
+                                console.log('  - Total:', totalString);
+                                console.log('  - Método:', metodoPago);
+                                
+                                // Guardar en localStorage para futuras cargas
+                                localStorage.setItem('numero_orden', numeroOrden);
+                                localStorage.setItem('ticket_items', JSON.stringify(items));
+                                localStorage.setItem('ticket_total', totalString);
+                                localStorage.setItem('metodo_pago', metodoPago);
+                            } else {
+                                console.error('❌ CRÍTICO: Respaldo falló - no hay datos disponibles');
+                            }
+                        }
+                        
+                    } catch (error) {
+                        console.error('❌ ERROR en verificación CheckoutPro:', error);
+                        // Como último recurso, mantener los datos originales si existen
+                    }
+                } else {
+                    console.warn('⚠️ Usando número generado como último recurso');
+                    
+                }
+            } else if (numeroOrden && (
+                (numeroOrden.toString().startsWith('QR-') && /[a-f]/.test(numeroOrden)) ||
+                numeroOrden.toString().startsWith('CP-') ||
+                numeroOrden.toString().startsWith('TEMP-')
+            )) {
+                // Si recibimos números temporales (QR-6ec6c1, QR-d51a7d, CP-123456, TEMP-123456)
+                // NO son números reales de la base de datos, hay que buscar el real
+                console.warn('⚠️ DETECTADO: Número temporal con caracteres (' + numeroOrden + '), obteniendo número real...');
+                
+                const externalRef = localStorage.getItem('external_reference');
+                
+                // Para QR virtual, external_reference puede no existir, usar método alternativo
+                if (externalRef) {
+                    console.log('🔍 Buscando número real con external_reference:', externalRef);
+                    
+                    try {
+                        const response = await fetch('/Totem_Murialdo/backend-checkoutpro/api/get_datos_completos_pedido.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ external_reference: externalRef })
+                        });
+                        
+                        const result = await response.json();
+                        if (result.success && result.numero_pedido) {
+                            numeroOrden = result.numero_pedido;
+                            console.log('✅ Número real obtenido con external_ref:', numeroOrden, '(método:', result.source, ')');
+                            localStorage.setItem('numero_orden', numeroOrden);
+                        } else {
+                            console.warn('⚠️ No se pudo obtener número real con external_ref, usando último pedido');
+                            await buscarUltimoPedido();
+                        }
+                    } catch (error) {
+                        console.error('❌ Error obteniendo número real con external_ref:', error);
+                        await buscarUltimoPedido();
+                    }
+                } else {
+                    console.warn('⚠️ No hay external_reference, buscando último pedido virtual...');
+                    await buscarUltimoPedido();
+                }
+                
+                // Función auxiliar para buscar último pedido
+                async function buscarUltimoPedido() {
+                    try {
+                        const response = await fetch('/Totem_Murialdo/backend-checkoutpro/api/get_numero_pedido.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ external_reference: 'ULTIMO_PEDIDO' }) // Señal especial
+                        });
+                        
+                        const result = await response.json();
+                        console.log('🔍 Respuesta API último pedido:', result);
+                        
+                        if (result.success && result.numero_pedido) {
+                            numeroOrden = result.numero_pedido;
+                            console.log('✅ Último pedido obtenido:', numeroOrden, '(método:', result.metodo, ')');
+                            localStorage.setItem('numero_orden', numeroOrden);
+                        } else {
+                            console.error('⚠️ No se pudo obtener último pedido desde API');
+                            console.error('⚠️ Respuesta completa:', result);
+                            
+                            // NO GENERAR NÚMEROS TEMPORALES - mantener el original
+                            console.error('❌ MANTENIENDO NÚMERO ORIGINAL - revisar conectividad de base de datos');
+                            // numeroOrden se mantiene con el valor que tenía
+                        }
+                    } catch (error) {
+                        console.error('❌ Error obteniendo último pedido:', error);
+                        console.error('❌ MANTENIENDO NÚMERO ORIGINAL - verificar conectividad');
+                        // numeroOrden se mantiene con el valor que tenía
+                    }
+                }
+            }
+            
+            console.log('📋 Datos cargados del localStorage:');
+            console.log('- ticket_items:', items);
+            console.log('- ticket_total (string):', totalString);
+            console.log('- numero_orden:', numeroOrden);
+            console.log('- metodo_pago:', metodoPago);
+            
+            // NORMALIZAR MÉTODO DE PAGO - Convertir a formatos amigables
+            if (metodoPago === 'QR_VIRTUAL') {
+                metodoPago = 'QR Mercado Pago';
+                console.log('🔄 Método de pago normalizado de QR_VIRTUAL a QR Mercado Pago');
+            } else if (metodoPago === 'VIRTUAL') {
+                // Distinguir entre QR virtual y CheckoutPro
+                if (sourceFromUrl === 'checkoutpro' || refFromUrl?.startsWith('CP_')) {
+                    metodoPago = 'CheckoutPro Mercado Pago';
+                } else {
+                    metodoPago = 'QR Mercado Pago';
+                }
+                console.log('🔄 Método de pago normalizado de VIRTUAL a:', metodoPago);
+            }
+            
+            // FALLBACK FINAL: Si aún no hay número, generar uno temporal usando external_reference
+            if (!numeroOrden && refFromUrl) {
+                console.warn('🚨 FALLBACK FINAL: Generando número temporal desde external_reference');
+                // Extraer timestamp del external_reference CP_1761257574509_qz4ov9lvd
+                const parts = refFromUrl.split('_');
+                if (parts.length >= 2) {
+                    const timestamp = parts[1]; // 1761257574509
+                    const shortId = timestamp.slice(-4); // Últimos 4 dígitos
+                    numeroOrden = 'K-' + shortId.padStart(3, '0').slice(-3); // K-509
+                    console.warn('⚠️ NÚMERO TEMPORAL GENERADO:', numeroOrden, 'desde', refFromUrl);
+                } else {
+                    numeroOrden = 'K-999'; // Fallback absoluto
+                    console.error('❌ FALLBACK ABSOLUTO:', numeroOrden);
+                }
+            }
+
+            // VALIDAR Y NORMALIZAR NÚMERO DE ORDEN - Preservar formato correcto del backend
+            console.log('🔍 Número original del backend:', numeroOrden);
+            
+            // Si ya tiene formato correcto K-XXX, no modificar
+            if (numeroOrden && numeroOrden.toString().match(/^K-\d{3}$/)) {
+                console.log('✅ Número ya tiene formato correcto, no se modifica:', numeroOrden);
+            } else if (numeroOrden && numeroOrden.toString().startsWith('QR-')) {
+                // Extraer solo los números de QR-d51a7d -> 51a7d -> 517
+                const despuesQR = numeroOrden.replace('QR-', '');
+                const soloNumeros = despuesQR.replace(/\D/g, ''); // Extraer solo dígitos
+                const numLimpio = parseInt(soloNumeros) || 1; // Si no hay números, usar 1
+                numeroOrden = 'K-' + numLimpio.toString().padStart(3, '0');
+                console.log('🔄 Número QR- convertido:', `QR-${despuesQR} -> números: ${soloNumeros} -> resultado: ${numeroOrden}`);
+            } else if (numeroOrden && numeroOrden.toString().startsWith('K') && !numeroOrden.includes('-')) {
+                // Si viene como K133 (formato legacy), convertir a K-133
+                const soloNumero = numeroOrden.replace(/^K/, '').replace(/\D/g, '');
+                if (soloNumero) {
+                    const numLimpio = parseInt(soloNumero) || 0;
+                    numeroOrden = 'K-' + numLimpio.toString().padStart(3, '0');
+                    console.log('🔄 Número K legacy convertido a:', numeroOrden);
+                }
+            } else if (numeroOrden && numeroOrden.toString().match(/^\d+$/)) {
+                // Si viene como número puro (ej: "133"), convertir a K-133
+                const numLimpio = parseInt(numeroOrden) || 0;
+                numeroOrden = 'K-' + numLimpio.toString().padStart(3, '0');
+                console.log('🔄 Número puro convertido a:', numeroOrden);
+            } else if (numeroOrden) {
+                console.warn('⚠️ Formato de número no reconocido:', numeroOrden);
+                
+                // Si el número contiene ERROR, QR-, TEMP- u otros marcadores temporales
+                if (numeroOrden.includes('ERROR') || numeroOrden.includes('TEMP') || 
+                    numeroOrden.match(/^QR-[a-f0-9]+$/i)) {
+                    console.error('❌ NÚMERO TEMPORAL DETECTADO - no se puede mostrar ticket válido');
+                    mostrarErrorConexion();
+                    return;
+                }
+            }
+            
+            console.log('✅ Número final usado:', numeroOrden);
+            
+            // Verificar si tenemos datos válidos
+            if (items.length === 0) {
+                console.warn('⚠️ No hay items en ticket_items, intentando recuperar...');
+                
+                // Intentar múltiples fuentes de backup
+                const backupSources = [
+                    'checkout_backup_carrito',
+                    'carrito',
+                    'pedido_items'
+                ];
+                
+                for (const source of backupSources) {
+                    const backup = localStorage.getItem(source);
+                    if (backup) {
+                        try {
+                            const backupData = JSON.parse(backup);
+                            if (Array.isArray(backupData) && backupData.length > 0) {
+                                items = backupData;
+                                localStorage.setItem('ticket_items', JSON.stringify(backupData));
+                                console.log('🔄 Usando backup de:', source, backupData);
+                                break;
+                            }
+                        } catch (e) {
+                            console.warn('Error parseando backup:', source, e);
+                        }
+                    }
+                }
+                
+                if (items.length === 0) {
+                    console.error('❌ No se pudieron recuperar items del pedido');
+                }
+            }
+            
+            // Verificar total - si está vacío o es cero, intentar recuperar o calcular
+            if (!totalString || totalString === '0' || totalString === '0.00') {
+                console.warn('⚠️ Total inválido, intentando recuperar...');
+                
+                const backupTotal = localStorage.getItem('total_carrito') || 
+                                  localStorage.getItem('checkout_total') ||
+                                  localStorage.getItem('pedido_total');
+                                  
+                if (backupTotal && backupTotal !== '0') {
+                    totalString = backupTotal;
+                    console.log('🔄 Total recuperado de backup:', totalString);
+                }
+            }
+            
+            // Actualizar elementos en la página con datos normalizados
+            document.getElementById('numero-orden').textContent = numeroOrden;
+            
+            // === LOG INICIAL PARA DEBUGGING RESERVA ===
+            console.log('🚀 INICIO VERIFICACIÓN RESERVA - Ticket.html cargado');
+            console.log('📦 localStorage completo:', localStorage);
+            console.log('🔑 es_reserva raw:', localStorage.getItem('es_reserva'));
+            console.log('🔑 horario_seleccionado raw:', localStorage.getItem('horario_seleccionado'));
+            
+            // === VERIFICAR Y MOSTRAR RESERVA INMEDIATAMENTE ===
+            try {
+                const esReservaValue = localStorage.getItem('es_reserva');
+                const horarioValue = localStorage.getItem('horario_seleccionado');
+                
+                console.log('🎯 VERIFICACIÓN INMEDIATA:');
+                console.log('- esReservaValue:', esReservaValue);
+                console.log('- horarioValue:', horarioValue);
+                
+                if (esReservaValue === '1' && horarioValue && horarioValue !== 'null') {
+                    const horarioObj = JSON.parse(horarioValue);
+                    console.log('- horarioObj parsed:', horarioObj);
+                    console.log('- horarioObj.texto:', horarioObj.texto);
+                    console.log('- horarioObj.hora:', horarioObj.hora);
+                    console.log('- horarioObj.id:', horarioObj.id);
+                    
+                    const reservaInfoElement = document.getElementById('reserva-info');
+                    const horaReservaElement = document.getElementById('hora-reserva');
+                    
+                    console.log('- reservaInfoElement:', reservaInfoElement);
+                    console.log('- horaReservaElement:', horaReservaElement);
+                    
+                    if (reservaInfoElement && horaReservaElement && horarioObj) {
+                        // Usar el campo "texto" que es el que contiene el horario legible
+                        const textoMostrar = horarioObj.texto || 
+                                           horarioObj.hora || 
+                                           horarioObj.nombre ||
+                                           `Horario ${horarioObj.id}`;
+                        console.log('🏷️ Texto final para mostrar:', textoMostrar);
+                        horaReservaElement.textContent = textoMostrar;
+                        reservaInfoElement.style.display = 'flex';
+                        reservaInfoElement.style.backgroundColor = '#e7f3ff';
+                        reservaInfoElement.style.border = '2px solid #007bff';
+                        reservaInfoElement.style.padding = '8px';
+                        reservaInfoElement.style.marginTop = '5px';
+                        reservaInfoElement.style.borderRadius = '5px';
+                        
+                        console.log('✅ RESERVA MOSTRADA EXITOSAMENTE:', textoMostrar);
+                    } else {
+                        console.error('❌ Elementos DOM no encontrados o datos inválidos');
+                    }
+                } else {
+                    console.log('ℹ️ NO ES RESERVA o datos faltantes');
+                }
+            } catch (error) {
+                console.error('❌ Error procesando reserva:', error);
+            }
+            
+            // Actualizar método de pago con valor normalizado
+            document.querySelectorAll('.info-label').forEach((el) => {
+                if (el.textContent.includes('Método de pago')) {
+                    el.nextElementSibling.textContent = metodoPago;
+                }
+            });
+            
+            document.getElementById('fecha').textContent = formatearFecha(ahora);
+            document.getElementById('hora').textContent = formatearHora(ahora);
+            
+            // Mostrar información de reserva si el pedido es una reserva
+            const es_reserva = localStorage.getItem('es_reserva') || '0';
+            const horario_seleccionado = JSON.parse(localStorage.getItem('horario_seleccionado') || 'null');
+            
+            console.log('🔍 DEBUG RESERVA:');
+            console.log('- es_reserva:', es_reserva);
+            console.log('- horario_seleccionado:', horario_seleccionado);
+            console.log('- Tipo es_reserva:', typeof es_reserva);
+            console.log('- Comparación es_reserva === "1":', es_reserva === '1');
+            
+            if (es_reserva === '1' && horario_seleccionado) {
+                const reservaInfo = document.getElementById('reserva-info');
+                const horaReserva = document.getElementById('hora-reserva');
+                
+                console.log('🔍 Elementos DOM:');
+                console.log('- reservaInfo:', reservaInfo);
+                console.log('- horaReserva:', horaReserva);
+                
+                if (reservaInfo && horaReserva) {
+                    const textoHora = horario_seleccionado.nombre || horario_seleccionado.horario || horario_seleccionado.id || 'Hora no disponible';
+                    horaReserva.textContent = textoHora;
+                    reservaInfo.style.display = 'flex';
+                    console.log('✅ Mostrando información de reserva:', textoHora);
+                } else {
+                    console.error('❌ No se encontraron elementos DOM para reserva');
+                }
+            } else {
+                console.log('ℹ️ Pedido no es reserva o no hay horario seleccionado');
+                console.log('- Condición es_reserva === "1":', es_reserva === '1');
+                console.log('- Condición horario_seleccionado:', !!horario_seleccionado);
+            }
+            
+            const referencia = 'REF-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            document.getElementById('referencia').textContent = referencia;
+            
+            // === EJECUTAR FUNCIÓN DEFINITIVA DE RESERVA DESPUÉS DE CARGAR DATOS ===
+            console.log('🔄 EJECUTANDO FUNCIÓN DEFINITIVA DE RESERVA (después de datos)...');
+            setTimeout(() => {
+                mostrarInformacionReservaDefinitiva();
+            }, 50);
+            
+            const orderItems = document.getElementById('order-items');
+            
+            console.log('🛒 Items finales a procesar:', items);
+            
+            // Validar que tenemos items válidos
+            if (!items || items.length === 0) {
+                console.error('❌ No hay items válidos para mostrar');
+                orderItems.innerHTML = '<div style="text-align:center; color:#888; padding:20px;">No se pudieron cargar los items del pedido</div>';
+                // Usar total del localStorage aunque no tengamos items
+                const totalFallback = parseFloat(totalString) || 0;
+                document.getElementById('total-pagado').textContent = `$${totalFallback.toLocaleString()}`;
+                return;
+            }
+            
+            // Agrupar productos iguales (nombre, id_producto, personalizaciones)
+            const agrupados = [];
+            let totalCalculado = 0;
+            
+            items.forEach(item => {
+                console.log('📦 Procesando item:', item);
+                
+                // Validar que el item tiene los datos mínimos necesarios
+                if (!item.nombre) {
+                    console.warn('⚠️ Item sin nombre:', item);
+                    return;
+                }
+                
+                const key = (item.id_producto || item.nombre) + '|' + JSON.stringify(item.personalizaciones || []);
+                const existente = agrupados.find(p => p.key === key);
+                
+                if (existente) {
+                    existente.cantidad += Number(item.cantidad) || 1;
+                } else {
+                    agrupados.push({ 
+                        ...item, 
+                        key,
+                        cantidad: Number(item.cantidad) || 1
+                    });
+                }
+            });
+            
+            let itemsHTML = '';
+            agrupados.forEach(item => {
+                // Mejorar el cálculo de precios para manejar diferentes formatos
+                let precioBase = 0;
+                if (item.precio !== undefined) {
+                    precioBase = Number(item.precio);
+                } else if (item.precio_unitario !== undefined) {
+                    precioBase = Number(item.precio_unitario);
+                } else if (item.price !== undefined) {
+                    precioBase = Number(item.price);
+                }
+                
+                // Calcular extras de personalizaciones
+                let extras = 0;
+                if (Array.isArray(item.personalizaciones) && item.personalizaciones.length > 0) {
+                    extras = item.personalizaciones.reduce((acc, p) => {
+                        if (typeof p === 'object' && p.precio_extra) {
+                            const extraPrice = parseFloat(String(p.precio_extra).replace(',', '.')) || 0;
+                            return acc + extraPrice;
+                        }
+                        return acc;
+                    }, 0);
+                }
+                
+                const precioUnitario = precioBase + extras;
+                const subtotal = precioUnitario * item.cantidad;
+                totalCalculado += subtotal;
+                
+                console.log(`💰 Item: ${item.nombre}, precio base: ${precioBase}, extras: ${extras}, cantidad: ${item.cantidad}, subtotal: ${subtotal}`);
+                
+                // Construir string de personalizaciones
+                let persStr = '';
+                if (Array.isArray(item.personalizaciones) && item.personalizaciones.length > 0) {
+                    const personalizacionesTexto = item.personalizaciones
+                        .map(p => p.nombre_opcion || p.nombre || p)
+                        .filter(nombre => nombre && nombre !== '')
+                        .join(', ');
+                    
+                    if (personalizacionesTexto) {
+                        persStr = `<span style="background:#eee; color:#444; border-radius:6px; padding:2px 8px; margin-left:8px; font-size:0.95em;">${personalizacionesTexto}</span>`;
+                    }
+                }
+                
+                itemsHTML += `<div class='item'>
+                    <span class='item-name'>${item.nombre}${persStr}</span>
+                    <span class='item-quantity'>x${item.cantidad}</span>
+                    <span class='item-price'>$${subtotal.toLocaleString()}</span>
+                </div>`;
+            });
+            
+            orderItems.innerHTML = itemsHTML;
+            
+            // Decidir qué total usar con lógica mejorada
+            let totalFinal = totalCalculado;
+            
+            if (totalString && totalString !== '0' && totalString !== '0.00') {
+                // Limpiar el total del localStorage de posibles caracteres no numéricos
+                const totalStringLimpio = totalString.toString().replace(/[^\d.,]/g, '');
+                const totalFromStorage = parseFloat(totalStringLimpio.replace(',', '.'));
+                
+                if (!isNaN(totalFromStorage) && totalFromStorage > 0) {
+                    // Si hay gran diferencia entre calculado y guardado, usar el mayor
+                    const diferencia = Math.abs(totalFromStorage - totalCalculado);
+                    const porcentajeDiferencia = diferencia / Math.max(totalFromStorage, totalCalculado);
+                    
+                    if (porcentajeDiferencia < 0.1) { // Diferencia menor al 10%
+                        totalFinal = totalFromStorage;
+                        console.log('💵 Usando total del localStorage (similar al calculado):', totalFromStorage);
+                    } else {
+                        totalFinal = Math.max(totalFromStorage, totalCalculado);
+                        console.log('💵 Gran diferencia detectada. Usando el mayor:', totalFinal, '(Storage:', totalFromStorage, ', Calculado:', totalCalculado, ')');
+                    }
+                } else {
+                    console.log('💵 Total del storage inválido, usando calculado:', totalCalculado);
+                }
+            } else {
+                console.log('💵 Sin total en storage, usando calculado:', totalCalculado);
+            }
+            
+            document.getElementById('total-pagado').textContent = `$${totalFinal.toLocaleString()}`;
+            
+            console.log('🎯 Total final mostrado:', totalFinal);
+            console.log('📊 Resumen ticket completado con', agrupados.length, 'items únicos');
+            
+            // Limpiar localStorage después de un tiempo (pero no inmediatamente para debug)
+            setTimeout(() => {
+                localStorage.removeItem('ticket_items');
+                localStorage.removeItem('ticket_total');
+                console.log('🧹 LocalStorage limpiado');
+            }, 5000); // 5 segundos en lugar de 1 para debugging
+        }
+        // Botón Continuar (reemplaza al botón Nueva Compra)
+        document.getElementById('Boton_Continuar').addEventListener('click', function () {
+            window.location.href = 'pantallafinal.html';
+        });
+
+        function imprimirTicket() {
+            // Recopilar los datos del ticket desde la pantalla
+            const numeroOrden = document.getElementById('numero-orden').textContent;
+            const fecha = document.getElementById('fecha').textContent;
+            const hora = document.getElementById('hora').textContent;
+
+            // Buscar el método de pago de forma segura
+            let metodoPago = '';
+            document.querySelectorAll('.info-label').forEach((el) => {
+                if (el.textContent.includes('Método de pago')) {
+                    metodoPago = el.nextElementSibling.textContent;
+                }
+            });
+
+            // Obtener el total pagado tal como aparece en pantalla
+            const totalPagado = document.getElementById('total-pagado').textContent;
+
+            // Recopilar los items del pedido
+            const items = [];
+            document.querySelectorAll('#order-items .item').forEach(item => {
+                const nombre = item.querySelector('.item-name').textContent;
+                const cantidad = item.querySelector('.item-quantity').textContent.replace('x', '');
+                const precio = item.querySelector('.item-price').textContent;
+                items.push({ nombre, cantidad, precio });
+            });
+
+            // Enviar los datos al archivo PHP
+            fetch('../../backend-checkoutpro/api/print_ticket.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    numeroOrden,
+                    fecha,
+                    hora,
+                    metodoPago,
+                    totalPagado,
+                    items
+                })
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Respuesta de impresión:', data);
+                })
+                .catch(error => {
+                    console.error('Error al imprimir el ticket:', error);
+                });
+        }
+
+        // Función para imprimir con QZ Tray (sin cartel usando llaves demo)
+        function printWithQZTray(ticketContent) {
+            return new Promise((resolve, reject) => {
+                if (typeof qz === 'undefined') {
+                    reject(new Error('QZ Tray no está disponible'));
+                    return;
+                }
+
+                console.log('🔧 Iniciando impresión directa con QZ Tray...');
+
+                // Verificar si ya está conectado o conectar (IGUAL QUE EN TEST)
+                const printPromise = qz.websocket.isActive() 
+                    ? Promise.resolve()
+                    : connectToQZTray();
+
+                printPromise
+                    .then(() => {
+                        console.log('✅ Usando conexión existente o nueva para impresión');
+                        return qz.printers.find();
+                    })
+                    .then((printers) => {
+                        if (printers.length === 0) {
+                            throw new Error('No se encontraron impresoras disponibles');
+                        }
+
+                        console.log('🖨️ Impresoras encontradas:', printers.join(', '));
+                        
+                        // Buscar la impresora térmica EPSON TM-T88V que detectaste
+                        let selectedPrinter = printers[0]; // Por defecto la primera
+                        
+                        const epsonThermal = printers.find(p => 
+                            p.toLowerCase().includes('epson tm-t88v') ||
+                            p.toLowerCase().includes('tm-t88v')
+                        );
+                        
+                        if (epsonThermal) {
+                            selectedPrinter = epsonThermal;
+                            console.log('🎯 Usando impresora térmica EPSON:', selectedPrinter);
+                        }
+                        
+                        // USAR LA MISMA CONFIGURACIÓN QUE FUNCIONA EN TEST
+                        const config = qz.configs.create(selectedPrinter);
+                        
+                        const data = [{
+                            type: 'raw',
+                            format: 'plain',
+                            data: ticketContent
+                        }];
+
+                        console.log('📄 Enviando ticket a la impresora:', selectedPrinter);
+                        return qz.print(config, data);
+                    })
+                    .then(() => {
+                        console.log('✅ Ticket impreso exitosamente SIN CARTEL');
+                        resolve();
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error al imprimir:', error);
+                        reject(error);
+                    });
+            });
+        }
+
+        // Función para imprimir ticket usando QZ Tray con configuración mejorada
+        function imprimirTicketQZ() {
+            // Recopilar datos del ticket desde la pantalla (ya normalizados)
+            const numeroOrden = document.getElementById('numero-orden').textContent;
+            const fecha = document.getElementById('fecha').textContent;
+            const hora = document.getElementById('hora').textContent;
+            const totalPagado = document.getElementById('total-pagado').textContent;
+
+            // Buscar el método de pago (ya normalizado)
+            let metodoPago = 'QR Mercado Pago';
+            document.querySelectorAll('.info-label').forEach((el) => {
+                if (el.textContent.includes('Método de pago')) {
+                    metodoPago = el.nextElementSibling.textContent;
+                }
+            });
+
+            // Obtener items originales con personalizaciones desde localStorage
+            let itemsOriginales = JSON.parse(localStorage.getItem('ticket_items') || '[]');
+            
+            // Si no hay items, intentar recuperar como en cargarTicket
+            if (itemsOriginales.length === 0) {
+                const backupSources = ['checkout_backup_carrito', 'carrito', 'pedido_items'];
+                for (const source of backupSources) {
+                    const backup = localStorage.getItem(source);
+                    if (backup) {
+                        try {
+                            const backupData = JSON.parse(backup);
+                            if (Array.isArray(backupData) && backupData.length > 0) {
+                                itemsOriginales = backupData;
+                                break;
+                            }
+                        } catch (e) {
+                            console.warn('Error parseando backup para impresión:', source, e);
+                        }
+                    }
+                }
+            }
+            
+            // Agrupar items originales (igual que en cargarTicket)
+            const itemsAgrupados = {};
+            itemsOriginales.forEach(item => {
+                const key = item.id_producto + '|' + JSON.stringify(item.personalizaciones || []);
+                if (itemsAgrupados[key]) {
+                    itemsAgrupados[key].cantidad += Number(item.cantidad);
+                } else {
+                    itemsAgrupados[key] = { ...item, cantidad: Number(item.cantidad) };
+                }
+            });
+
+            // Crear el contenido del ticket con formato térmico
+            const ticketData = [
+                '\x1B@', // Inicializar impresora
+                '\x1B!\x38', // Texto grande
+                'TOTEM MURIALDO\n',
+                '\x1B!\x00', // Texto normal
+                '===============================\n',
+                `Ticket No: ${numeroOrden}\n`,
+                `Fecha: ${fecha}\n`,
+                `Hora: ${hora}\n`,
+                '===============================\n'
+            ];
+
+            // Agregar items del pedido con formato de comandas
+            Object.values(itemsAgrupados).forEach(item => {
+                // Usar el nombre limpio del producto
+                const nombreLimpio = item.nombre;
+                
+                // Agregar el producto con cantidad
+                ticketData.push(`${item.cantidad}x ${nombreLimpio}\n`);
+                
+                // Agregar personalizaciones si existen (igual que en comandas)
+                if (Array.isArray(item.personalizaciones) && item.personalizaciones.length > 0) {
+                    item.personalizaciones.forEach(pers => {
+                        const nombrePers = pers.nombre_opcion || pers;
+                        ticketData.push(`     -${nombrePers}\n`);
+                    });
+                }
+                
+                // Calcular precio con extras
+                const precioBase = item.precio ?? item.precio_unitario ?? 0;
+                const extras = Array.isArray(item.personalizaciones) 
+                    ? item.personalizaciones.reduce((acc, p) => acc + (typeof p === 'object' ? (parseFloat(String(p.precio_extra).replace(',', '.')) || 0) : 0), 0) 
+                    : 0;
+                const subtotal = (Number(precioBase) + extras) * Number(item.cantidad);
+                
+                ticketData.push(`$${subtotal.toLocaleString()}\n`);
+            });
+
+            ticketData.push('===============================\n');
+            ticketData.push(`TOTAL: ${totalPagado}\n`);
+            ticketData.push(`PAGO: ${metodoPago}\n`);
+            ticketData.push('===============================\n');
+            ticketData.push('GRACIAS POR SU COMPRA\n');
+            ticketData.push('\n\n\n');
+            ticketData.push('\x1DVA0'); // Corte de papel
+
+            // Usar la función de impresión con QZ Tray (sin cartel)
+            printWithQZTray(ticketData.join(''))
+                .then(() => {
+                    console.log('🎉 Ticket enviado a la impresora exitosamente');
+                    // Mostrar mensaje de éxito al usuario
+                    const botonImprimir = document.getElementById('Boton_Imprimir_Ticket');
+                    const textoOriginal = botonImprimir.textContent;
+                    botonImprimir.textContent = '✓ Impreso';
+                    botonImprimir.style.backgroundColor = '#28a745';
+                    
+                    // Restaurar el botón después de 3 segundos
+                    setTimeout(() => {
+                        botonImprimir.textContent = textoOriginal;
+                        botonImprimir.style.backgroundColor = '';
+                    }, 3000);
+                })
+                .catch(err => {
+                    console.error('❌ Error de impresión:', err);
+                    // Mostrar mensaje de error al usuario
+                    const botonImprimir = document.getElementById('Boton_Imprimir_Ticket');
+                    const textoOriginal = botonImprimir.textContent;
+                    botonImprimir.textContent = '✗ Error';
+                    botonImprimir.style.backgroundColor = '#dc3545';
+                    
+                    // Mostrar detalles del error
+                    alert('Error al imprimir: ' + err.message + '\n\nVerifica que QZ Tray esté ejecutándose y que haya una impresora conectada.');
+                    
+                    // Restaurar el botón después de 3 segundos
+                    setTimeout(() => {
+                        botonImprimir.textContent = textoOriginal;
+                        botonImprimir.style.backgroundColor = '';
+                    }, 3000);
+                });
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Configurar QZ Tray al cargar la página (IGUAL QUE EN TEST QUE FUNCIONA)
+            console.log('🔧 Inicializando QZ Tray...');
+            console.log('🌐 Entorno: ' + (window.location.hostname === 'ilm2025.webhop.net' ? 'Producción' : 'Local'));
+            
+            // Cargar los datos del ticket primero
+            await cargarTicket();
+            
+            // Configurar QZ Tray después de cargar la página (como en test)
+            setTimeout(() => {
+                if (typeof qz !== 'undefined' && typeof configureQZTray === 'function') {
+                    try {
+                        if (configureQZTray()) {
+                            console.log('✅ QZ Tray configurado con llaves demo - Cartel eliminado');
+                        } else {
+                            console.error('❌ Error configurando QZ Tray');
+                        }
+                    } catch (error) {
+                        console.error('❌ Excepción al configurar QZ Tray:', error);
+                    }
+                } else {
+                    console.error('❌ QZ Tray o su configuración no están disponibles');
+                }
+            }, 500);
+        });
+
+        // === DETECCIÓN MÓVIL Y GESTIÓN DE BOTONES ===
+        function esDispositivoMovil() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            console.log('=== DETECCIÓN MÓVIL EN TICKET ===');
+            console.log('screen.width:', screen.width);
+            console.log('screen.height:', screen.height);
+            console.log('window.innerWidth:', window.innerWidth);
+            console.log('window.innerHeight:', window.innerHeight);
+            
+            // EXCLUIR resolución específica 1080x1920 (va a imprimir normal)
+            const esResolucion1080x1920 = (
+                (screen.width === 1080 && screen.height === 1920) ||
+                (screen.height === 1080 && screen.width === 1920) ||
+                (window.innerWidth === 1080 && window.innerHeight === 1920) ||
+                (window.innerHeight === 1080 && window.innerWidth === 1920)
+            );
+            
+            if (esResolucion1080x1920) {
+                console.log('🔍 Resolución 1080x1920 detectada - NO ES MÓVIL para efectos del ticket');
+                return false;
+            }
+            
+            // Detectar móviles por user agent
+            const esMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+            
+            // Detectar por características de pantalla táctil y tamaño
+            const esPantallaTactil = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const esPantallaChica = window.innerWidth <= 768;
+            
+            const resultado = esMobile || (esPantallaTactil && esPantallaChica);
+            console.log('¿Es dispositivo móvil para ticket?:', resultado);
+            
+            return resultado;
+        }
+
+        // === GENERAR PDF DEL TICKET (COPIA VISUAL) ===
+        function generarPDFTicket() {
+            console.log('📄 Generando PDF del ticket con datos reales...');
+            
+            // Debug de datos disponibles
+            console.log('🔍 Datos disponibles para PDF:');
+            console.log('- localStorage ticket_items:', localStorage.getItem('ticket_items'));
+            console.log('- localStorage ticket_total:', localStorage.getItem('ticket_total'));
+            console.log('- localStorage metodo_pago:', localStorage.getItem('metodo_pago'));
+            console.log('- DOM numero_orden:', document.getElementById('numero-orden')?.textContent);
+            console.log('- DOM fecha:', document.getElementById('fecha')?.textContent);
+            console.log('- DOM hora:', document.getElementById('hora')?.textContent);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // === COLORES Y ESTILOS SIMILARES AL TICKET ===
+                const colorPrimario = [58, 154, 83]; // Verde #3A9A53
+                const colorSecundario = [102, 102, 102]; // Gris
+                const colorTexto = [51, 51, 51]; // Negro suave
+                
+                // === ENCABEZADO ===
+                doc.setFillColor(colorPrimario[0], colorPrimario[1], colorPrimario[2]);
+                doc.rect(0, 0, 210, 40, 'F'); // Fondo verde
+                
+                doc.setTextColor(255, 255, 255); // Texto blanco
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.text('COMPROBANTE DE PAGO', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Totem Murialdo - Sistema de Pedidos', 105, 30, { align: 'center' });
+                
+                // === INFORMACIÓN PRINCIPAL ===
+                let yPos = 55;
+                doc.setTextColor(colorTexto[0], colorTexto[1], colorTexto[2]);
+                
+                // Obtener datos reales del ticket (elementos con IDs actuales)
+                const numeroOrden = document.getElementById('numero-orden')?.textContent || 'N/A';
+                const fechaPago = document.getElementById('fecha')?.textContent || new Date().toLocaleDateString('es-ES');
+                const horaPago = document.getElementById('hora')?.textContent || new Date().toLocaleTimeString('es-ES');
+                const metodoPago = localStorage.getItem('metodo_pago') || 'QR Mercado Pago';
+                const totalPagado = document.getElementById('total-amount')?.textContent || localStorage.getItem('ticket_total') || 'N/A';
+                
+                // Card de información (fondo gris claro)
+                doc.setFillColor(248, 249, 250);
+                doc.roundedRect(15, yPos - 5, 180, 35, 3, 3, 'F');
+                
+                // Número de orden destacado
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(16);
+                doc.text('Número de orden:', 20, yPos + 5);
+                doc.setTextColor(colorPrimario[0], colorPrimario[1], colorPrimario[2]);
+                doc.text(numeroOrden, 85, yPos + 5);
+                
+                // Información en dos columnas
+                doc.setTextColor(colorTexto[0], colorTexto[1], colorTexto[2]);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(11);
+                
+                yPos += 15;
+                doc.text('Fecha:', 20, yPos);
+                doc.text(fechaPago, 50, yPos);
+                doc.text('Hora:', 110, yPos);
+                doc.text(horaPago, 130, yPos);
+                
+                yPos += 8;
+                doc.text('Método de pago:', 20, yPos);
+                doc.setFont('helvetica', 'bold');
+                doc.text(metodoPago, 65, yPos);
+                
+                // === DETALLE DEL PEDIDO ===
+                yPos += 20;
+                
+                // Encabezado de items (fondo verde claro)
+                doc.setFillColor(232, 245, 232);
+                doc.rect(15, yPos - 3, 180, 12, 'F');
+                
+                doc.setTextColor(colorPrimario[0], colorPrimario[1], colorPrimario[2]);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(14);
+                doc.text('DETALLE DEL PEDIDO', 20, yPos + 5);
+                
+                yPos += 15;
+                
+                // Encabezados de columnas
+                doc.setTextColor(colorSecundario[0], colorSecundario[1], colorSecundario[2]);
+                doc.setFontSize(10);
+                doc.text('PRODUCTO', 20, yPos);
+                doc.text('CANT.', 120, yPos);
+                doc.text('PRECIO UNIT.', 140, yPos);
+                doc.text('SUBTOTAL', 170, yPos);
+                
+                // Línea separadora
+                doc.setDrawColor(colorSecundario[0], colorSecundario[1], colorSecundario[2]);
+                doc.setLineWidth(0.3);
+                doc.line(20, yPos + 2, 190, yPos + 2);
+                
+                yPos += 10;
+                
+                // === OBTENER ITEMS REALES DEL TICKET ===
+                let ticketItems = [];
+                console.log('📋 Obteniendo items para PDF...');
+                
+                // Primero intentar desde localStorage (datos originales)
+                try {
+                    const storedItems = localStorage.getItem('ticket_items');
+                    if (storedItems) {
+                        ticketItems = JSON.parse(storedItems);
+                        console.log('✅ Items obtenidos del localStorage:', ticketItems);
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Error obteniendo items del localStorage:', error);
+                }
+                
+                // Si no hay items en localStorage, obtener del DOM actualizado
+                if (ticketItems.length === 0) {
+                    console.log('🔍 Obteniendo items del DOM...');
+                    const itemElements = document.querySelectorAll('.order-item');
+                    itemElements.forEach(itemEl => {
+                        const nombre = itemEl.querySelector('.item-name')?.textContent?.trim() || 'Producto';
+                        const cantidad = itemEl.querySelector('.item-quantity')?.textContent?.replace('x', '')?.trim() || '1';
+                        const precio = itemEl.querySelector('.item-unit-price')?.textContent?.replace('$', '')?.replace(',', '')?.trim() || '0';
+                        
+                        ticketItems.push({ 
+                            nombre: nombre, 
+                            cantidad: parseInt(cantidad) || 1, 
+                            precio_unitario: parseFloat(precio) || 0
+                        });
+                    });
+                    console.log('✅ Items obtenidos del DOM:', ticketItems);
+                }
+                
+                // === AGREGAR ITEMS AL PDF ===
+                doc.setTextColor(colorTexto[0], colorTexto[1], colorTexto[2]);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                
+                let totalCalculado = 0;
+                
+                ticketItems.forEach((item, index) => {
+                    if (yPos > 250) { // Nueva página si es necesario
+                        doc.addPage();
+                        yPos = 30;
+                    }
+                    
+                    const nombre = item.nombre || `Producto ${index + 1}`;
+                    const cantidad = parseInt(item.cantidad) || 1;
+                    const precioUnit = parseFloat(item.precio_unitario) || 0;
+                    const subtotal = cantidad * precioUnit;
+                    totalCalculado += subtotal;
+                    
+                    // Fondo alternado para items
+                    if (index % 2 === 0) {
+                        doc.setFillColor(251, 252, 253);
+                        doc.rect(15, yPos - 3, 180, 8, 'F');
+                    }
+                    
+                    // Truncar nombre si es muy largo
+                    const nombreCorto = nombre.length > 30 ? nombre.substring(0, 27) + '...' : nombre;
+                    
+                    doc.text(nombreCorto, 20, yPos);
+                    doc.text(cantidad.toString(), 125, yPos, { align: 'center' });
+                    doc.text(`$${precioUnit.toFixed(2)}`, 155, yPos, { align: 'center' });
+                    doc.text(`$${subtotal.toFixed(2)}`, 185, yPos, { align: 'right' });
+                    
+                    yPos += 8;
+                });
+                
+                // === TOTAL FINAL ===
+                yPos += 10;
+                
+                // Usar el total calculado o el del localStorage, formateado correctamente
+                let totalFinal = totalCalculado;
+                const totalStorage = localStorage.getItem('ticket_total');
+                if (totalStorage && parseFloat(totalStorage.replace(',', '')) > 0) {
+                    totalFinal = parseFloat(totalStorage.replace(',', ''));
+                }
+                
+                console.log('💰 Total para PDF - Calculado:', totalCalculado, 'Storage:', totalStorage, 'Final:', totalFinal);
+                
+                // Fondo destacado para el total
+                doc.setFillColor(colorPrimario[0], colorPrimario[1], colorPrimario[2]);
+                doc.roundedRect(15, yPos - 3, 180, 15, 3, 3, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(16);
+                doc.text('TOTAL PAGADO:', 20, yPos + 7);
+                doc.text(`$${totalFinal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 185, yPos + 7, { align: 'right' });
+                
+                // === PIE DE PÁGINA ===
+                yPos += 30;
+                doc.setTextColor(colorSecundario[0], colorSecundario[1], colorSecundario[2]);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text('Comprobante generado automáticamente', 105, yPos, { align: 'center' });
+                doc.text(`Fecha de generación: ${new Date().toLocaleString('es-ES')}`, 105, yPos + 5, { align: 'center' });
+                
+                // Información adicional del establecimiento
+                yPos += 15;
+                doc.setFontSize(8);
+                doc.text('Totem Murialdo - Sistema de Pedidos Automático', 105, yPos, { align: 'center' });
+                doc.text('Conserve este comprobante como respaldo de su pago', 105, yPos + 5, { align: 'center' });
+                
+                // === GENERAR Y DESCARGAR ===
+                const fechaHoy = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+                const horaActual = new Date().toTimeString().slice(0, 5).replace(':', ''); // HHMM
+                const numeroLimpio = numeroOrden.replace(/[^A-Z0-9]/g, ''); // Solo alfanumérico
+                const fileName = `Comprobante_${numeroLimpio}_${fechaHoy}_${horaActual}.pdf`;
+                
+                // Descargar PDF
+                doc.save(fileName);
+                
+                console.log('✅ PDF generado exitosamente (copia visual):', fileName);
+                
+                // Mostrar mensaje de éxito al usuario
+                const statusMessage = document.createElement('div');
+                statusMessage.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 10000;
+                    background: #d4edda; color: #155724; padding: 15px 20px;
+                    border: 1px solid #c3e6cb; border-radius: 8px;
+                    font-family: Inter, sans-serif; font-size: 14px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    max-width: 300px; text-align: center;
+                `;
+                statusMessage.innerHTML = `
+                    ✅ <strong>Comprobante descargado</strong><br>
+                    <small>Orden: ${numeroOrden}<br>
+                    Total: ${totalFinal.toLocaleString('es-ES', { style: 'currency', currency: 'ARS' })}</small>
+                `;
+                document.body.appendChild(statusMessage);
+                
+                setTimeout(() => {
+                    if (document.body.contains(statusMessage)) {
+                        document.body.removeChild(statusMessage);
+                    }
+                }, 4000);
+                
+            } catch (error) {
+                console.error('❌ Error generando PDF:', error);
+                alert('Error al generar el comprobante PDF. Por favor intente nuevamente.');
+            }
+        }
+
+        // Event listener para botón de descarga PDF
+        document.getElementById('Boton_Descargar_PDF').addEventListener('click', function() {
+            generarPDFTicket();
+        });
+
+        // === MOSTRAR INFORMACIÓN DE RESERVA - FUNCIÓN DEFINITIVA ===
+        function mostrarInformacionReservaDefinitiva() {
+            console.log('🎯 === FUNCIÓN DEFINITIVA DE RESERVA ===');
+            
+            try {
+                const es_reserva = localStorage.getItem('es_reserva');
+                const horario_raw = localStorage.getItem('horario_seleccionado');
+                
+                console.log('� DATOS RAW:');
+                console.log('- es_reserva:', es_reserva);
+                console.log('- horario_raw:', horario_raw);
+                
+                if (es_reserva === '1' && horario_raw && horario_raw !== 'null') {
+                    const horario_obj = JSON.parse(horario_raw);
+                    console.log('📦 OBJETO PARSEADO:', horario_obj);
+                    
+                    const elemento_reserva = document.getElementById('reserva-info');
+                    const elemento_texto = document.getElementById('hora-reserva');
+                    
+                    console.log('🎨 ELEMENTOS DOM:');
+                    console.log('- elemento_reserva:', elemento_reserva);
+                    console.log('- elemento_texto:', elemento_texto);
+                    
+                    if (elemento_reserva && elemento_texto && horario_obj) {
+                        // Obtener el texto del horario
+                        const texto_horario = horario_obj.texto || horario_obj.hora || horario_obj.nombre || `ID:${horario_obj.id}`;
+                        
+                        console.log('⭐ TEXTO A MOSTRAR:', texto_horario);
+                        
+                        // Aplicar el texto y mostrar
+                        elemento_texto.textContent = texto_horario;
+                        elemento_reserva.style.display = 'flex';
+                        elemento_reserva.style.backgroundColor = '#e7f3ff';
+                        elemento_reserva.style.border = '2px solid #007bff';
+                        elemento_reserva.style.padding = '10px';
+                        elemento_reserva.style.borderRadius = '8px';
+                        elemento_reserva.style.marginTop = '10px';
+                        
+                        console.log('✅ ✅ ✅ RESERVA APLICADA EXITOSAMENTE ✅ ✅ ✅');
+                        return true;
+                    } else {
+                        console.error('❌ Faltan elementos DOM o datos');
+                        return false;
+                    }
+                } else {
+                    console.log('ℹ️ NO es reserva o datos inválidos');
+                    const elemento_reserva = document.getElementById('reserva-info');
+                    if (elemento_reserva) {
+                        elemento_reserva.style.display = 'none';
+                    }
+                    return false;
+                }
+            } catch (error) {
+                console.error('💥 ERROR en mostrarInformacionReservaDefinitiva:', error);
+                return false;
+            }
+        }
+
+        // === CONFIGURAR BOTONES SEGÚN DISPOSITIVO ===
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar información de reserva - FUNCIÓN DEFINITIVA
+            setTimeout(() => {
+                console.log('⏰ EJECUTANDO FUNCIÓN DEFINITIVA DE RESERVA...');
+                mostrarInformacionReservaDefinitiva();
+            }, 200);
+            
+            // Solo mostrar el botón de descargar PDF (ya no hay botón de imprimir)
+            console.log('� Mostrando botón de descarga PDF');
+            document.getElementById('Boton_Descargar_PDF').style.display = 'inline-block';
+        });
+
+        // === FUNCIÓN PARA MOSTRAR ERROR DE CONEXIÓN ===
+        function mostrarErrorConexion() {
+            const ticketContainer = document.querySelector('.ticket-container');
+            
+            ticketContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 48px; color: #ff4444; margin-bottom: 20px;">⚠️</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 15px;">
+                        Error de Conexión
+                    </div>
+                    <div style="font-size: 16px; color: #666; margin-bottom: 25px; line-height: 1.4;">
+                        No se pudo obtener la información del pedido desde la base de datos.<br>
+                        El pago se procesó correctamente.
+                    </div>
+                    <div style="background: #f8f8f8; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                        <div style="font-size: 14px; color: #333; margin-bottom: 10px;">
+                            <strong>¿Qué hacer?</strong>
+                        </div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.4;">
+                            • Contacta al personal del establecimiento<br>
+                            • Muestra esta pantalla como comprobante de pago<br>
+                            • El pedido está registrado en el sistema
+                        </div>
+                    </div>
+                    <button onclick="volverAlMenu()" 
+                            style="background: #00a650; color: white; padding: 12px 24px; 
+                                   border: none; border-radius: 6px; font-size: 16px; 
+                                   cursor: pointer; margin-right: 10px;">
+                        Volver al Menú
+                    </button>
+                    <button onclick="location.reload()" 
+                            style="background: #0066cc; color: white; padding: 12px 24px; 
+                                   border: none; border-radius: 6px; font-size: 16px; 
+                                   cursor: pointer;">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
+

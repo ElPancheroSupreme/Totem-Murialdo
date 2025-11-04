@@ -1,0 +1,63 @@
+{
+    "numero_orden": "K4673",
+    "carrito": [
+        {
+            "id_producto": 112,
+            "nombre": "Cafe",
+            "cantidad": 1,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/2.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 111,
+            "nombre": "Medialuna",
+            "cantidad": 1,
+            "precio_unitario": "1100.00",
+            "es_personalizable": 1,
+            "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/1.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 2200,
+    "fecha": "2025-09-26",
+    "hora": "19:33:38",
+    "origen": "kiosco",
+    "external_reference": "qr_68d714c27f7f1",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 19:33:48",
+    "webhook_id": "127673899536",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-138",
+    "id_pedido": "211",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 2200,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-138",
+        "metodo_pago": "QR Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 112,
+                "nombre": "Cafe",
+                "cantidad": 1,
+                "precio_unitario": 1100,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/2.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 111,
+                "nombre": "Medialuna",
+                "cantidad": 1,
+                "precio_unitario": "1100.00",
+                "es_personalizable": 1,
+                "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/1.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "2,200.00"
+    }
+}

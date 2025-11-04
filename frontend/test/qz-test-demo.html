@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba QZ Tray - Demo Keys</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Prueba de QZ Tray con Demo Keys</h1>
+    <p>Esta página prueba la configuración de QZ Tray con las llaves demo para eliminar el cartel.</p>
+    
+    <div class="test-section info">
+        <h3>Estado de QZ Tray</h3>
+        <p id="qz-status">Verificando...</p>
+        <button onclick="testQZConnection()">Probar Conexión</button>
+    </div>
+    
+    <div class="test-section info">
+        <h3>Estado del Certificado</h3>
+        <p id="cert-status">No verificado</p>
+        <button onclick="testCertificate()">Probar Certificado</button>
+    </div>
+    
+    <div class="test-section info">
+        <h3>Estado de la Firma</h3>
+        <p id="sign-status">No verificado</p>
+        <button onclick="testSigning()">Probar Firma</button>
+    </div>
+    
+    <div class="test-section info">
+        <h3>Prueba de Impresión</h3>
+        <p id="print-status">No probado</p>
+        <button onclick="testPrint()">Probar Impresión de Prueba</button>
+    </div>
+    
+    <div class="test-section info">
+        <h3>Log de Eventos</h3>
+        <pre id="log-output"></pre>
+        <button onclick="clearLog()">Limpiar Log</button>
+    </div>
+
+    <script src="qz-tray.js"></script>
+    <script src="qz-config-final.js"></script>
+    <script>
+        function log(message) {
+            const logOutput = document.getElementById('log-output');
+            const timestamp = new Date().toLocaleTimeString();
+            logOutput.textContent += `[${timestamp}] ${message}\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log-output').textContent = '';
+        }
+
+        function updateStatus(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.parentElement.className = 'test-section ' + (isSuccess ? 'success' : 'error');
+        }
+
+        function testQZConnection() {
+            log('Iniciando prueba de conexión a QZ Tray...');
+            
+            if (typeof qz === 'undefined') {
+                updateStatus('qz-status', 'ERROR: QZ Tray no está cargado', false);
+                log('ERROR: QZ Tray no está disponible');
+                return;
+            }
+
+            // Verificar si ya hay una conexión abierta
+            if (qz.websocket.isActive()) {
+                log('QZ Tray ya está conectado');
+                updateStatus('qz-status', 'ÉXITO: Ya conectado a QZ Tray', true);
+                // Intentar obtener versión de forma segura
+                try {
+                    if (qz.version) {
+                        log(`Versión de QZ Tray: ${qz.version}`);
+                    } else {
+                        log('Información de versión no disponible');
+                    }
+                } catch (e) {
+                    log('No se pudo obtener la versión: ' + e.message);
+                }
+                return;
+            }
+
+            connectToQZTray()
+                .then(function() {
+                    updateStatus('qz-status', 'ÉXITO: Conectado a QZ Tray', true);
+                    log('ÉXITO: Conectado a QZ Tray');
+                    // Intentar obtener versión de forma segura
+                    try {
+                        if (qz.version) {
+                            log(`Versión de QZ Tray: ${qz.version}`);
+                        } else if (typeof qz.websocket.getVersion === 'function') {
+                            return qz.websocket.getVersion();
+                        } else {
+                            log('Información de versión no disponible en esta versión de QZ');
+                        }
+                    } catch (e) {
+                        log('No se pudo obtener la versión: ' + e.message);
+                    }
+                })
+                .then(function(version) {
+                    if (version) {
+                        log(`Versión de QZ Tray: ${version}`);
+                    }
+                })
+                .catch(function(error) {
+                    updateStatus('qz-status', 'ERROR: ' + error.message, false);
+                    log('ERROR conectando a QZ Tray: ' + error.message);
+                });
+        }
+
+        function testCertificate() {
+            log('Probando carga de certificado...');
+            
+            // Usar ruta relativa que funcione en cualquier entorno
+            const certUrl = './digital-certificate.txt';
+            
+            log('Intentando cargar certificado desde: ' + certUrl);
+            
+            fetch(certUrl, {
+                cache: 'no-store',
+                headers: {'Content-Type': 'text/plain'}
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error('HTTP ' + response.status);
+                }
+            })
+            .then(function(certificate) {
+                if (certificate.includes('-----BEGIN CERTIFICATE-----')) {
+                    updateStatus('cert-status', 'ÉXITO: Certificado demo cargado correctamente', true);
+                    log('ÉXITO: Certificado demo cargado');
+                } else {
+                    throw new Error('Formato de certificado inválido');
+                }
+            })
+            .catch(function(error) {
+                updateStatus('cert-status', 'ERROR: ' + error.message, false);
+                log('ERROR cargando certificado: ' + error.message);
+            });
+        }
+
+        function testSigning() {
+            log('Probando endpoint de firma...');
+            
+            const testMessage = 'test-message-' + Date.now();
+            // Usar la ruta VERIFICADA que funciona
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const signUrl = baseUrl + '/Totem_Murialdo/backend/api/sign_message.php';
+            
+            log('Intentando firmar usando ruta verificada: ' + signUrl);
+            
+            fetch(signUrl + '?request=' + encodeURIComponent(testMessage), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('HTTP ' + response.status);
+                }
+            })
+            .then(function(data) {
+                if (data.signature) {
+                    updateStatus('sign-status', 'ÉXITO: Endpoint de firma funcionando', true);
+                    log('ÉXITO: Mensaje firmado correctamente');
+                } else {
+                    throw new Error('No se recibió firma del servidor');
+                }
+            })
+            .catch(function(error) {
+                updateStatus('sign-status', 'ERROR: ' + error.message, false);
+                log('ERROR en endpoint de firma: ' + error.message);
+            });
+        }
+
+        function testPrint() {
+            log('Probando impresión...');
+            
+            if (typeof qz === 'undefined') {
+                updateStatus('print-status', 'ERROR: QZ Tray no está disponible', false);
+                return;
+            }
+
+            // Verificar si ya está conectado o conectar
+            const printPromise = qz.websocket.isActive() 
+                ? Promise.resolve()
+                : connectToQZTray();
+
+            printPromise
+                .then(function() {
+                    log('Usando conexión existente o nueva para impresión');
+                    return qz.printers.find();
+                })
+                .then(function(printers) {
+                    if (printers.length === 0) {
+                        throw new Error('No se encontraron impresoras');
+                    }
+                    
+                    log(`Impresoras encontradas: ${printers.join(', ')}`);
+                    
+                    const config = qz.configs.create(printers[0]);
+                    const data = [{
+                        type: 'raw',
+                        format: 'plain',
+                        data: 'PRUEBA QZ TRAY - DEMO KEYS\n' +
+                              'Fecha: ' + new Date().toLocaleString() + '\n' +
+                              'Esta impresión no debería mostrar cartel\n' +
+                              'gracias a las llaves demo configuradas.\n\n\n\n'
+                    }];
+                    
+                    return qz.print(config, data);
+                })
+                .then(function() {
+                    updateStatus('print-status', 'ÉXITO: Impresión enviada sin cartel', true);
+                    log('ÉXITO: Impresión enviada correctamente');
+                })
+                .catch(function(error) {
+                    updateStatus('print-status', 'ERROR: ' + error.message, false);
+                    log('ERROR en impresión: ' + error.message);
+                });
+        }
+
+        // Ejecutar pruebas iniciales al cargar la página
+        window.addEventListener('DOMContentLoaded', function() {
+            log('Página de prueba cargada');
+            log('Entorno: ' + (window.location.hostname === 'ilm2025.webhop.net' ? 'Producción' : 'Local'));
+            
+            setTimeout(function() {
+                testQZConnection();
+                setTimeout(testCertificate, 1000);
+                setTimeout(testSigning, 2000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

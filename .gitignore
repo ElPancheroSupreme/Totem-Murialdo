@@ -1,0 +1,16 @@
+# Ignorar carpeta de estados de órdenes
+backend/ordenes_status/
+# Ignorar archivo de horarios
+backend/config/horarios.json
+# Ignorar dependencias de Composer
+/vendor/
+/viejo/
+
+backend/config/horarios.json
+# Ignorar archivos de configuración sensibles
+
+# Ignorar archivos temporales y de sistema
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

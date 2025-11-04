@@ -1,0 +1,48 @@
+{
+    "habilitar_horarios": false,
+    "dias": {
+        "lunes": {
+            "habilitado": true,
+            "desde": "07:30",
+            "hasta": "13:00"
+        },
+        "martes": {
+            "habilitado": true,
+            "desde": "07:30",
+            "hasta": "13:00"
+        },
+        "miércoles": {
+            "habilitado": true,
+            "desde": "07:30",
+            "hasta": "13:00"
+        },
+        "jueves": {
+            "habilitado": true,
+            "desde": "07:30",
+            "hasta": "13:00"
+        },
+        "viernes": {
+            "habilitado": true,
+            "desde": "07:30",
+            "hasta": "13:00"
+        },
+        "sábado": {
+            "habilitado": true,
+            "desde": "07:30",
+            "hasta": "13:00"
+        },
+        "domingo": {
+            "habilitado": true,
+            "desde": "07:30",
+            "hasta": "13:00"
+        }
+    },
+    "modo_mantenimiento": false,
+    "monto_minimo_mp": 10,
+    "max_unidades_carrito": 10,
+    "tiempo_inactividad": 300,
+    "metodos_pago": {
+        "efectivo": true,
+        "qr": true
+    }
+}

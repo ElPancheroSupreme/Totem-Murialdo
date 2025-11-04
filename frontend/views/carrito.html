@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/style/carrito.css">
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <title>Carrito</title>
+</head>
+
+<body>
+    <div class="Contenedor_Principal">
+        <!-- Header -->
+        <header>
+            <div class="Boton_Atras">
+                <img src="../assets/images/Iconos/Flecha_Atras.png" alt="">
+            </div>
+            <p>Tu Orden</p>
+        </header>
+        <!-- Main -->
+        <main>
+            <div class="Scroll_Orden"></div>
+        </main>
+        <!-- Mensaje de máximo unidades -->
+        <div id="mensaje-maximo" class="mensaje-maximo" style="display:none;"></div>
+        <!-- Footer -->
+        <footer>
+            <div class="Barra_Footer">
+                <p class="Total">Total $6.000,00</p>
+            </div>
+            <div class="Contenedor_Botones_Footer">
+                <button id="Cancelar_Orden">Cancelar orden</button>
+                <button id="Continuar">Continuar</button>
+            </div>
+        </footer>
+    </div>
+    <!-- Overlay Personalizacion (copiado de kiosco_dinamico.html) -->
+    <div class="Overlay_Personalizacion" id="Overlay_Personalizacion" style="display:none;">
+        <div class="OP_Contenido">
+            <div class="OP_Header">
+                <div class="OP_InfoProducto"></div>
+                <div class="OP_ContenedorPrecio"></div>
+            </div>
+            <div class="OP_Body">
+                <p class="OP_Body_Titulo">Personalizar</p>
+                <div class="OP_Contenedor_Personalizaciones"></div>
+            </div>
+            <div class="OP_Footer">
+                <button id="Eliminar">Eliminar</button>
+                <button id="Agregar">Guardar</button>
+            </div>
+        </div>
+    </div>
+    <script src="../assets/js/carrito.js"></script>
+    <script src="../assets/js/inactivity-detector.js"></script>
+</body>
+
+</html>

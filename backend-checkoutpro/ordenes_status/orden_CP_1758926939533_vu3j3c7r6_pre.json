@@ -1,0 +1,27 @@
+{
+    "carrito": [
+        {
+            "id_producto": 92,
+            "nombre": "Mogul Piecitos",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/10.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 83,
+            "nombre": "Mogul Tiburones",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/1.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758926939533_vu3j3c7r6",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T22:48:59.533Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 19:50:52"
+}

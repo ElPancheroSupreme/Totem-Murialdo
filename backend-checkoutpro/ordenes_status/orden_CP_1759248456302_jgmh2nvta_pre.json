@@ -1,0 +1,52 @@
+{
+    "carrito": [
+        {
+            "id_producto": 76,
+            "nombre": "Pancho",
+            "cantidad": 1,
+            "precio_unitario": "1800.00",
+            "es_personalizable": 1,
+            "imagen": "..\/assets\/Images\/Kiosco\/Comidas\/Pancho.png",
+            "personalizaciones": [
+                {
+                    "id_opcion": 35,
+                    "nombre_opcion": "Papas",
+                    "precio_extra": 0
+                },
+                {
+                    "id_opcion": 36,
+                    "nombre_opcion": "Ketchup",
+                    "precio_extra": 0
+                },
+                {
+                    "id_opcion": 37,
+                    "nombre_opcion": "Chedar",
+                    "precio_extra": 200
+                }
+            ]
+        },
+        {
+            "id_producto": 21,
+            "nombre": "Agua Villavicencio 500ml",
+            "cantidad": 1,
+            "precio_unitario": 1000,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Agua_Villavicencio_500ml.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 10,
+            "nombre": "Aquarius Manzana 500ml",
+            "cantidad": 1,
+            "precio_unitario": 1800,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Aquarius_Manzana_500ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1759248456302_jgmh2nvta",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-30T16:07:36.303Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-30 13:09:28"
+}

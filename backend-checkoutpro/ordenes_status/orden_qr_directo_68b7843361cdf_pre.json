@@ -1,0 +1,15 @@
+{
+    "carrito": [
+        {
+            "id_producto": 4,
+            "nombre": "Coca Cola 500ml",
+            "precio_unitario": 2000,
+            "cantidad": 1,
+            "personalizaciones": []
+        }
+    ],
+    "total": 2000,
+    "external_reference": "qr_directo_68b7843361cdf",
+    "metodo_pago": "VIRTUAL",
+    "estado": "PREPARACION"
+}

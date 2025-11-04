@@ -1,0 +1,27 @@
+{
+    "carrito": [
+        {
+            "id_producto": 22,
+            "nombre": "Alfajor Guaymallen Simple Blanco",
+            "cantidad": 1,
+            "precio_unitario": 450,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/1.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 23,
+            "nombre": "Alfajor Guaymallen Triple Blanco",
+            "cantidad": 1,
+            "precio_unitario": 650,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Alfajores\/2.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758923901117_6uqdymlf1",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T21:58:21.118Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 19:00:13"
+}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosco - Dinámico</title>
+    <link rel="icon" href="../assets/images/Iconos/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/Iconos/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/Iconos/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/Iconos/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/Iconos/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/Iconos/android-chrome-512x512.png">
+    <link rel="stylesheet" href="../assets/style/kiosco.css">
+</head>
+
+<body>
+    <main>
+        <div class="Columna_Categorias">
+            <div class="Columna_Categorias_Informacion">
+                <a href="index.html"><img src="../assets/images/Iconos/Flecha_Atras.png" alt=""></a>
+                <p>Kiosco</p>
+            </div>
+            <div class="Contenedor_Categorias" id="Contenedor_Categorias">
+                <!-- Las categorías se cargarán dinámicamente -->
+            </div>
+        </div>
+        <div class="Columna_Productos">
+            <div class="Columna_Productos_Informacion">
+                <button id="menu-toggle" class="Menu_Toggle_Btn">☰</button>
+                <p id="Nombre_Categoria_Seleccionada" class="Nombre_Categoria">Cargando...</p>
+                <button class="Boton_Carrito" onclick="window.location.href='carrito.html'">🛒 Carrito
+                    <span id="Contador_Carrito" class="Carrito_Contador">0</span>
+                </button>
+                <button class="Boton_Carrito_Desplegable" >🛒 Carrito</button>
+            </div>
+            <div class="Contenedor_Productos" id="Contenedor_Productos">
+                <div class="Categoria" style="display: flex;">
+                    <div id="loading" style="width: 100%; text-align: center; padding: 2rem;">
+                        Cargando productos...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Overlay para cerrar el menú en móviles -->
+    <div id="menu-overlay" class="Menu_Overlay"></div>
+    <footer>
+        <div class="boton-toggle-footer" id="boton-toggle-footer">
+            ↓
+        </div>
+        <div class="Footer_Barra" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Mi Orden - Kiosco</span>
+            <span id="minimo-mp-indicador"></span>
+        </div>
+        <script>
+            // Mostrar el mínimo de MP en la barra inferior, alineado a la derecha
+            async function cargarMinimoMPIndicador() {
+                try {
+                    const res = await fetch('/Totem_Murialdo/backend/admin/api/configuracion_horarios.php');
+                    const data = await res.json();
+                    if (data && data.success && data.config && typeof data.config.monto_minimo_mp !== 'undefined') {
+                        document.getElementById('minimo-mp-indicador').textContent = `Mínimo de MP: $${parseFloat(data.config.monto_minimo_mp).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                    }
+                } catch (e) {
+                    document.getElementById('minimo-mp-indicador').textContent = '';
+                }
+            }
+            document.addEventListener('DOMContentLoaded', cargarMinimoMPIndicador);
+        </script>
+        <div class="Footer_Contenedor_Orden">Tu orden está vacía</div>
+        <div class="Footer_Contenedor_Botones">
+            <button id="Boton_Cancelar">Cancelar orden</button>
+            <button id="Boton_Continuar">Continuar</button>
+        </div>
+    </footer>
+    <!-- Overlay Mantenimiento -->
+    <div id="overlay-mantenimiento"
+        style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(30,30,30,0.95);color:#fff;flex-direction:column;align-items:center;justify-content:center;font-size:2em;">
+        <div style="margin-bottom:24px;">⚠️ Modo Mantenimiento Activo</div>
+        <div>El tótem está temporalmente fuera de servicio.</div>
+    </div>
+
+
+    <!-- Overlay Personalizacion -->
+    <div class="Overlay_Personalizacion" id="Overlay_Personalizacion">
+        <div class="OP_Contenido">
+            <div class="OP_Header">
+                <div class="OP_InfoProducto">
+                    <img src="../assets/images/Kiosco/Comidas/Pancho.png" alt="" class="OP_ImagenProducto">
+                    <p class="OP_NombreProducto">Pancho</p>
+                </div>
+                <div class="OP_ContenedorPrecio">
+                    <p class="OP_Precio">$1.800</p>
+                </div>
+            </div>
+            <div class="OP_Body">
+                <p class="OP_Body_Titulo">Personalizar</p>
+                <div class="OP_Contenedor_Personalizaciones">
+                    <!-- Ejemplo Personalizacion -->
+                    <div class="OP_Personalizacion">
+                        <div class="OP_Checkbox"></div>
+                        <p class="OP_Personalizacion_Nombre">Ketchup</p>
+                    </div>
+                    <div class="OP_Personalizacion">
+                        <div class="OP_Checkbox"></div>
+                        <p class="OP_Personalizacion_Nombre">Mayonesa</p>
+                    </div>
+                    <div class="OP_Personalizacion">
+                        <div class="OP_Checkbox"></div>
+                        <p class="OP_Personalizacion_Nombre">Mostaza</p>
+                    </div>
+                    <div class="OP_Personalizacion">
+                        <div class="OP_Checkbox"></div>
+                        <p class="OP_Personalizacion_Nombre">Papas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="OP_Footer">
+                <button id="Eliminar">Eliminar</button>
+                <button id="Agregar">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/kiosco_dinamico.js"></script>
+    <script src="../assets/js/totem_horarios.js"></script>
+    <script>
+        async function checkMantenimiento() {
+            try {
+                const res = await fetch('/Totem_Murialdo/backend/admin/api/configuracion_horarios.php');
+                const data = await res.json();
+                if (data && data.success && data.config && data.config.modo_mantenimiento) {
+                    document.getElementById('overlay-mantenimiento').style.display = 'flex';
+                } else {
+                    document.getElementById('overlay-mantenimiento').style.display = 'none';
+                }
+            } catch (e) {
+                document.getElementById('overlay-mantenimiento').style.display = 'none';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ocultar overlay antes de la primera consulta
+            document.getElementById('overlay-mantenimiento').style.display = 'none';
+            checkMantenimiento();
+            setInterval(checkMantenimiento, 5000); // Actualiza cada 5 segundos
+        });
+    </script>
+    <script src="../assets/js/inactivity-detector.js"></script>
+    <div id="mensaje-maximo" class="mensaje-maximo" style="display:none;"></div>
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+{
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 6,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758930081777_ak31mxrvl",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T23:41:21.778Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 20:43:13",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 20:43:23",
+    "numero_pedido_final": "K-153"
+}

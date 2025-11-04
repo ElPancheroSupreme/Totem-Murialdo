@@ -1,0 +1,44 @@
+{
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1759267876822_nbx9fdiis",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-30T21:31:16.823Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-30 18:33:09",
+    "status": "approved",
+    "fecha_pago": "2025-09-30 18:33:21",
+    "webhook_id": "128113314904",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-171",
+    "id_pedido": "244",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 150,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-171",
+        "metodo_pago": "CheckoutPro Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 1,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "150.00"
+    }
+}

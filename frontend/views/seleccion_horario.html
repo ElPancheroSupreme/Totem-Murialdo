@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="../assets/images/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="../assets/images/Iconos/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../assets/images/android-chrome-512x512.png">
+    <title>Seleccion de Horario</title>
+    <link rel="stylesheet" href="../assets/style/index.css">
+    <title>Seleccion de Horario</title>
+</head>
+
+<body>
+    <main>
+        <div class="Logo">
+            <img src="../assets/images/Iconos/Logo.png" alt="">
+        </div>
+
+        <div class="Bienvenida">
+            <p>¡Bienvenido!</p>
+        </div>
+
+        <div class="Pregunta">
+            <p>¿De qué modo queres pedir?</p>
+        </div>
+
+        <div class="Contenedor_Botones">
+            <button id="Ahora">
+                <img src="../assets/images/Iconos/Icono_PedirAhora.png" alt="">
+                <p>Ahora</p>
+            </button>
+            <button id="Reservar">
+                <img src="../assets/images/Iconos/Icono_Reservar.png" alt="">
+                <p>Reservar</p>
+            </button>
+        </div>
+    </main>
+    <!-- Overlay Mantenimiento -->
+    <div id="overlay-mantenimiento"
+        style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(30,30,30,0.95);color:#fff;flex-direction:column;align-items:center;justify-content:center;font-size:2em;">
+        <div style="margin-bottom:24px;">⚠️ Modo Mantenimiento Activo</div>
+        <div>El tótem está temporalmente fuera de servicio.</div>
+    </div>
+
+
+    <script>
+        async function checkMantenimiento() {
+            try {
+                const res = await fetch('/Totem_Murialdo/backend/admin/api/configuracion_horarios.php');
+                const data = await res.json();
+                if (data && data.success && data.config && data.config.modo_mantenimiento) {
+                    document.getElementById('overlay-mantenimiento').style.display = 'flex';
+                    document.getElementById('Ahora').disabled = true;
+                    document.getElementById('Reservar').disabled = true;
+                } else {
+                    document.getElementById('overlay-mantenimiento').style.display = 'none';
+                    document.getElementById('Ahora').disabled = false;
+                    document.getElementById('Reservar').disabled = false;
+                }
+            } catch (e) {
+                document.getElementById('overlay-mantenimiento').style.display = 'none';
+            }
+        }
+
+        // Funcionalidad para los botones Ahora y Reservar
+        function manejarSeleccionPedido() {
+            const btnAhora = document.getElementById('Ahora');
+            const btnReservar = document.getElementById('Reservar');
+
+            btnAhora.addEventListener('click', () => {
+                // Guardar en localStorage que NO es una reserva
+                localStorage.setItem('es_reserva', '0');
+                // Redirigir a index.html
+                window.location.href = 'index.html';
+            });
+
+            btnReservar.addEventListener('click', () => {
+                // Guardar en localStorage que SÍ es una reserva
+                localStorage.setItem('es_reserva', '1');
+                // Redirigir a horario_reserva.html
+                window.location.href = 'horario_reserva.html';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ocultar overlay antes de la primera consulta
+            document.getElementById('overlay-mantenimiento').style.display = 'none';
+            checkMantenimiento();
+            setInterval(checkMantenimiento, 5000); // Actualiza cada 5 segundos
+            
+            // Inicializar funcionalidad de botones
+            manejarSeleccionPedido();
+        });
+    </script>
+    <script src="../assets/js/index_horarios.js"></script>
+    <script src="../assets/js/inactivity-detector.js"></script>
+
+    
+
+
+</body>
+
+</html>

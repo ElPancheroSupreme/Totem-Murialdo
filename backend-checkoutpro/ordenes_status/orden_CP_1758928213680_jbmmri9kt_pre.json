@@ -1,0 +1,18 @@
+{
+    "carrito": [
+        {
+            "id_producto": 9,
+            "nombre": "Fanta 237ml",
+            "cantidad": 1,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Fanta_237ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "external_reference": "CP_1758928213680_jbmmri9kt",
+    "tipo_pago": "checkoutpro",
+    "fecha_creacion": "2025-09-26T23:10:13.681Z",
+    "estado": "pendiente",
+    "saved_at": "2025-09-26 20:12:06"
+}

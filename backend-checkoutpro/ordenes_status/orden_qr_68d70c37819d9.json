@@ -1,0 +1,63 @@
+{
+    "numero_orden": "K2483",
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 86,
+            "nombre": "Mogul Tubitos Tutti Frutti",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/4.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 1050,
+    "fecha": "2025-09-26",
+    "hora": "18:57:11",
+    "origen": "kiosco",
+    "external_reference": "qr_68d70c37819d9",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 18:57:21",
+    "webhook_id": "127668939860",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-129",
+    "id_pedido": "202",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 1050,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-129",
+        "metodo_pago": "QR Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 1,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 86,
+                "nombre": "Mogul Tubitos Tutti Frutti",
+                "cantidad": 1,
+                "precio_unitario": 900,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/4.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "1,050.00"
+    }
+}

@@ -1,0 +1,63 @@
+{
+    "numero_orden": "K6477",
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 98,
+            "nombre": "Bon o Bon Clasico Blanco",
+            "cantidad": 1,
+            "precio_unitario": 600,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/16.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 750,
+    "fecha": "2025-09-26",
+    "hora": "18:58:17",
+    "origen": "kiosco",
+    "external_reference": "qr_68d70c7984182",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 18:58:25",
+    "webhook_id": "127669188446",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-130",
+    "id_pedido": "203",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 750,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-130",
+        "metodo_pago": "QR Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 93,
+                "nombre": "Oblitas",
+                "cantidad": 1,
+                "precio_unitario": 150,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+                "personalizaciones": []
+            },
+            {
+                "id_producto": 98,
+                "nombre": "Bon o Bon Clasico Blanco",
+                "cantidad": 1,
+                "precio_unitario": 600,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/16.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "750.00"
+    }
+}

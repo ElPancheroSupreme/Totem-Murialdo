@@ -1,0 +1,32 @@
+{
+    "numero_orden": "K2483",
+    "carrito": [
+        {
+            "id_producto": 93,
+            "nombre": "Oblitas",
+            "cantidad": 1,
+            "precio_unitario": 150,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/11.png",
+            "personalizaciones": []
+        },
+        {
+            "id_producto": 86,
+            "nombre": "Mogul Tubitos Tutti Frutti",
+            "cantidad": 1,
+            "precio_unitario": 900,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Golosinas\/4.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 1050,
+    "fecha": "2025-09-26",
+    "hora": "18:57:11",
+    "origen": "kiosco",
+    "external_reference": "qr_68d70c37819d9",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 18:57:21",
+    "numero_pedido_final": "K-129"
+}

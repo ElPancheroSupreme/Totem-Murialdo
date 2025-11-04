@@ -1,0 +1,23 @@
+{
+    "numero_orden": "K0157",
+    "carrito": [
+        {
+            "id_producto": 111,
+            "nombre": "Medialuna",
+            "cantidad": 1,
+            "precio_unitario": "1100.00",
+            "es_personalizable": 1,
+            "imagen": "..\/assets\/Images\/Kiosco\/Cafeteria\/1.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 1100,
+    "fecha": "2025-09-26",
+    "hora": "20:57:42",
+    "origen": "kiosco",
+    "external_reference": "qr_68d72876a755b",
+    "webhook_processed": true,
+    "status": "approved",
+    "fecha_procesamiento": "2025-09-26 20:57:49",
+    "numero_pedido_final": "K-158"
+}

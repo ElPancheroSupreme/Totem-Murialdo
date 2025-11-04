@@ -1,0 +1,45 @@
+{
+    "numero_orden": "K1779",
+    "carrito": [
+        {
+            "id_producto": 9,
+            "nombre": "Fanta 237ml",
+            "cantidad": 1,
+            "precio_unitario": 1100,
+            "es_personalizable": 0,
+            "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Fanta_237ml.png",
+            "personalizaciones": []
+        }
+    ],
+    "total": 1100,
+    "fecha": "2025-09-26",
+    "hora": "20:42:30",
+    "origen": "kiosco",
+    "external_reference": "qr_68d724e635bd2",
+    "status": "approved",
+    "fecha_pago": "2025-09-26 20:42:42",
+    "webhook_id": "127683003350",
+    "webhook_type": "payment",
+    "order_status": "paid",
+    "numero_pedido": "K-152",
+    "id_pedido": "225",
+    "metodo_pago": "VIRTUAL",
+    "monto_total": 1100,
+    "estado_pedido": "PREPARACION",
+    "ticket_data": {
+        "numero_orden": "K-152",
+        "metodo_pago": "QR Mercado Pago",
+        "ticket_items": [
+            {
+                "id_producto": 9,
+                "nombre": "Fanta 237ml",
+                "cantidad": 1,
+                "precio_unitario": 1100,
+                "es_personalizable": 0,
+                "imagen": "..\/assets\/Images\/Kiosco\/Bebidas\/Fanta_237ml.png",
+                "personalizaciones": []
+            }
+        ],
+        "ticket_total": "1,100.00"
+    }
+}
