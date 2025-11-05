@@ -1,8 +1,8 @@
 <?php
-$host = "tu-endpoint-de-AWS-rds.amazonaws.com";
+$host = "totem-bd.cqjg0u2k0i35.us-east-1.rds.amazonaws.com";
 $user = "admin";
-$pass = "tu-contraseña";
-$db   = "nombre_de_tu_base";
+$pass = "Demetrio72w!";
+$db   = "bg02";
 $port = 3306;
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
