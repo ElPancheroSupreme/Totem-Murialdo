@@ -1,5 +1,5 @@
 # Integración QR Dinámico Mercado Pago
-
+hola (ahora lo boroo esto)
 Esta aplicación permite generar códigos QR dinámicos de Mercado Pago para recibir pagos de forma rápida y segura.
 
 ## 🚀 Características
