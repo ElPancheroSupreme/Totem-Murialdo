@@ -9,18 +9,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    env:
+      ACTIONS_STEP_DEBUG: true
 
-    - name: SSH Deploy
-      uses: appleboy/ssh-action@v0.1.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /var/www/html
-          sudo git pull origin main
-          sudo chown -R www-data:www-data /var/www/html
-          sudo systemctl restart apache2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          debug: true
+          script: |
+            cd /var/www/html
+            sudo git pull origin main
+            sudo chown -R www-data:www-data /var/www/html
+            sudo systemctl restart apache2
