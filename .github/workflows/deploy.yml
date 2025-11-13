@@ -1,3 +1,6 @@
+env:
+  ACTIONS_STEP_DEBUG: true
+
 name: Deploy to AWS EC2 (git pull)
 
 on:
@@ -8,9 +11,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    env:
-      ACTIONS_STEP_DEBUG: true
 
     steps:
       - name: Checkout code
